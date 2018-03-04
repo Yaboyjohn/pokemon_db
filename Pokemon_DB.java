@@ -94,24 +94,28 @@ public class Pokemon_DB {
                 System.out.println(tableName + " table has no entries");
                 return;
             }
-            System.out.println("ID:" + "\t" + "Name:" + "\t" + "Item:" + "\t" + "\t" + "HP:" + "\t" + "Att:" +
-            "Def:" + "SpA:" + "SpD:" + "Sp: " +
-            "Move 1:" + "\t" + "       Move 2:" + "          " + "Move 3:" + "            " + "Move 4:" + "\t");
+//            System.out.println("ID:" + "\t" + "Name:" + "\t" + "Item:" + "\t" + "\t" + "HP:" + "\t" + "Att:" +
+//            "Def:" + "SpA:" + "SpD:" + "Sp: " +
+//            "Move 1:" + "\t" + "       Move 2:" + "          " + "Move 3:" + "            " + "Move 4:" + "\t");
+            System.out.println(String.format("%2s %10s %20s %10s %10s %10s %10s %10s %5s %10s %10s %10s %10s",
+                    "ID", "Name", "Item", "HP", "Attack", "Defense", "Sp. Attack", "Sp. Defense", "Speed", "Move 1",
+                    "Move 2", "Move 3", "Move 4"));
             // loop through the result set
             while (rs.next()) {
-                System.out.println(rs.getInt("id") +  "\t" +
-                        rs.getString("name") + "\t" +
-                        rs.getString("item") + "\t" +
-                        rs.getInt("hp") + "\t" +
-                        rs.getInt("attack") + "\t" +
-                        rs.getInt("defense") + "\t" +
-                        rs.getInt("spattack") + "\t" +
-                        rs.getInt("spdefense") + "\t" +
-                        rs.getInt("speed") + "\t" +
-                        rs.getString("move1") + "        " +
-                        rs.getString("move2") + "        " +
-                        rs.getString("move3") + "        " +
-                        rs.getString("move4") + "\t");
+                System.out.println(String.format("%2s %10s %20s %10s %10s %10s %10s %10s %5s %10s %10s %10s %10s",
+                        rs.getInt("id"),
+                        rs.getString("name"),
+                        rs.getString("item"),
+                        rs.getInt("hp"),
+                        rs.getInt("attack"),
+                        rs.getInt("defense"),
+                        rs.getInt("spattack"),
+                        rs.getInt("spdefense"),
+                        rs.getInt("speed"),
+                        rs.getString("move1"),
+                        rs.getString("move2"),
+                        rs.getString("move3"),
+                        rs.getString("move4")));
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -355,10 +359,8 @@ public class Pokemon_DB {
         }
     }
 
-    public static void insertToTable(Pokemon_DB db) {
+    public static void insertToTable(Pokemon_DB db, String pokemon_name) {
         Scanner scan = new Scanner(System.in);
-        System.out.print("Name: ");
-        String name = scan.nextLine();
         System.out.print("Item: ");
         String item = scan.nextLine();
         System.out.print("HP: ");
@@ -381,7 +383,7 @@ public class Pokemon_DB {
         String move3 = scan.nextLine();
         System.out.print("Move 4: ");
         String move4 = scan.nextLine();
-        db.insert(name, item, hp, attack, defense, spAttack, spDefense, speed, move1, move2, move3, move4);
+        db.insert(pokemon_name, item, hp, attack, defense, spAttack, spDefense, speed, move1, move2, move3, move4);
         System.out.println("SAVED");
 
     }
@@ -471,7 +473,7 @@ public class Pokemon_DB {
                 System.out.println("INSERT HELP GUIDE HERE");
             }
             if (command.equals(COMMAND.INSERT)) {
-                insertToTable(app);
+                insertToTable(app, inputArray[1]);
             }
             if (command.equals(COMMAND.DELETE)) {
                 // valid arguments check
