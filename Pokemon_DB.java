@@ -3,7 +3,7 @@ import java.util.Scanner;
 
 public class Pokemon_DB {
     public enum COMMAND {
-        GET, HELP, INSERT, DELETE, UPDATE, EXIT, ALL, DELETEALL, AVG, MAX;
+        GET, HELP, INSERT, DELETE, UPDATE, EXIT, ALL, DELETEALL, AVG, MAX, SIZE;
     }
 
     public enum CATEGORY {
@@ -411,6 +411,17 @@ public class Pokemon_DB {
         }
     }
 
+    public void size(String tableName) {
+        String sql = "SELECT COUNT(*) as count FROM " + tableName;
+        try (Connection conn = this.connect();
+             Statement stmt  = conn.createStatement();
+             ResultSet rs    = stmt.executeQuery(sql)){
+             System.out.println("Num Entries: " + rs.getInt("count"));
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
     public static void insertToTable(Pokemon_DB db, String pokemon_name) {
         Scanner scan = new Scanner(System.in);
         System.out.print("Item: ");
@@ -453,6 +464,7 @@ public class Pokemon_DB {
         if (com.equals("deleteall")) return COMMAND.DELETEALL;
         if (com.equals("avg")) return COMMAND.AVG;
         if (com.equals("max")) return COMMAND.MAX;
+        if (com.equals("size")) return COMMAND.SIZE;
         else return null;
     }
 
@@ -500,6 +512,9 @@ public class Pokemon_DB {
             String[] inputArray = input.split(" ");
             if (command == null) {
                 System.out.println("Invalid Command");
+            }
+            else if (command.equals(COMMAND.SIZE)) {
+                app.size("pokemon");
             }
             else if (command.equals(COMMAND.AVG)) {
                 app.avg("pokemon");
