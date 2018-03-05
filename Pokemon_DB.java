@@ -94,9 +94,6 @@ public class Pokemon_DB {
                 System.out.println(tableName + " table has no entries");
                 return;
             }
-//            System.out.println("ID:" + "\t" + "Name:" + "\t" + "Item:" + "\t" + "\t" + "HP:" + "\t" + "Att:" +
-//            "Def:" + "SpA:" + "SpD:" + "Sp: " +
-//            "Move 1:" + "\t" + "       Move 2:" + "          " + "Move 3:" + "            " + "Move 4:" + "\t");
             System.out.println(String.format("%2s %10s %20s %10s %10s %10s %10s %10s %5s %10s %10s %10s %10s",
                     "ID", "Name", "Item", "HP", "Attack", "Defense", "Sp. Attack", "Sp. Defense", "Speed", "Move 1",
                     "Move 2", "Move 3", "Move 4"));
@@ -149,10 +146,10 @@ public class Pokemon_DB {
 
     public int selectID(int ID, String tableName) {
         String sql = "SELECT * FROM " + tableName + " WHERE id = " + ID;
+        int count = 0;
         try (Connection conn = this.connect();
              Statement stmt  = conn.createStatement();
              ResultSet rs    = stmt.executeQuery(sql)){
-            int count = 0;
             while (rs.next()) {
                 count++;
                 System.out.println(rs.getInt("id") +  "\t" +
@@ -169,20 +166,19 @@ public class Pokemon_DB {
                         rs.getString("move3") + "        " +
                         rs.getString("move4") + "\t");
             }
-            return count;
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
-        return -1;
+        return count;
     }
 
 
     public int selectName(String pokemon_name, String tableName) {
         String sql = "SELECT * FROM " + tableName + " WHERE name LIKE " + "'" + pokemon_name + "'";
+        int count = 0;
         try (Connection conn = this.connect();
              Statement stmt  = conn.createStatement();
              ResultSet rs    = stmt.executeQuery(sql)){
-            int count = 0;
             while (rs.next()) {
                 count++;
                 System.out.println(rs.getInt("id") +  "\t" +
@@ -199,19 +195,20 @@ public class Pokemon_DB {
                         rs.getString("move3") + "        " +
                         rs.getString("move4") + "\t");
             }
-            return count;
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
-        return -1;
+        return count;
     }
 
-    public void selectItem(String item, String tableName) {
+    public int selectItem(String item, String tableName) {
         String sql = "SELECT * FROM " + tableName + " WHERE item LIKE " + "'" + item + "'";
+        int count = 0;
         try (Connection conn = this.connect();
              Statement stmt  = conn.createStatement();
              ResultSet rs    = stmt.executeQuery(sql)){
             while (rs.next()) {
+                count++;
                 System.out.println(rs.getInt("id") +  "\t" +
                         rs.getString("name") + "\t" +
                         rs.getString("item") + "\t" +
@@ -229,16 +226,19 @@ public class Pokemon_DB {
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
+        return count;
     }
 
-    public void selectMove(String move, String tableName) {
+    public int selectMove(String move, String tableName) {
         String sql = "SELECT * FROM " + tableName + " WHERE move1 LIKE " + "'" + move + "' OR " +
                 "move2 LIKE " + "'" + move + "' OR " +  "move3 LIKE " + "'" + move + "' OR "
                 +  "move4 LIKE " + "'" + move + "'";
+        int count = 0;
         try (Connection conn = this.connect();
              Statement stmt  = conn.createStatement();
              ResultSet rs    = stmt.executeQuery(sql)){
             while (rs.next()) {
+                count++;
                 System.out.println(rs.getInt("id") +  "\t" +
                         rs.getString("name") + "\t" +
                         rs.getString("item") + "\t" +
@@ -256,6 +256,7 @@ public class Pokemon_DB {
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
+        return count;
     }
 
     public void selectStat(String stat, String operator, int num, String tableName) {
@@ -444,46 +445,64 @@ public class Pokemon_DB {
             String argument = getArgument(input);
             COMMAND command = parseCommand(input);
             String[] inputArray = input.split(" ");
-            if (command.equals(COMMAND.GET)) {
-
+            if (command == null) {
+                System.out.println("Invalid Command");
+            }
+            else if (command.equals(COMMAND.GET)) {
+                if (inputArray.length < 2 || inputArray.length >= 5) {
+                    System.out.println("Invalid Arguments");
+                }
                 // This is getting a single pokemon ex. get suicune
-                if (inputArray.length == 2) {
-                    app.selectName(inputArray[1], "pokemon");
+                else if (inputArray.length == 2) {
+                    int count = app.selectName(inputArray[1], "pokemon");
+                    if (count <= 0) {
+                        System.out.println("This pokemon is not in the database");
+                    }  
                 }
                 // This can be anything other than name ex. get item lum berry
-                if (inputArray.length > 2) {
+                else {
                     CATEGORY category = parseCategory(input);
-                    if (category.equals(CATEGORY.ITEM)) {
-                        app.selectItem(argument, "pokemon");
+                    if (category == null) {
+                        System.out.println("Invalid arguments");
                     }
-                    if (category.equals(CATEGORY.MOVE)) {
-                        app.selectMove(argument, "pokemon");
+                    else if (category.equals(CATEGORY.ITEM)) {
+                        int count = app.selectItem(argument, "pokemon");
+                        if (count == 0) {
+                            System.out.println("This item is not in the database");
+                        }
+                    }
+                    else if (category.equals(CATEGORY.MOVE)) {
+                        int count = app.selectMove(argument, "pokemon");
+                        if (count == 0) {
+                            System.out.println("This move is not in the database");
+                        }
                     }
                     // get hp > 300, get hp = 300, get hp >= 300
-                    if (category.equals(CATEGORY.HP) || category.equals(CATEGORY.ATTACK)|| category.equals(CATEGORY.DEFENSE) ||
+                    else if (category.equals(CATEGORY.HP) || category.equals(CATEGORY.ATTACK)|| category.equals(CATEGORY.DEFENSE) ||
                             category.equals(CATEGORY.SPATTACK) || category.equals(CATEGORY.SPDEFENSE) || category.equals(CATEGORY.SPEED)) {
                         String stat = inputArray[1];
                         String operator = parseStat(input)[0];
                         int num = Integer.parseInt(parseStat(input)[1]);
                         app.selectStat(stat, operator, num, "pokemon");
+                    } else {
+                        System.out.println("Invalid Arguments");
                     }
                 }
             }
-            if (command.equals(COMMAND.HELP)) {
+            else if (command.equals(COMMAND.HELP)) {
                 System.out.println("INSERT HELP GUIDE HERE");
             }
-            if (command.equals(COMMAND.INSERT)) {
+            else if (command.equals(COMMAND.INSERT)) {
                 insertToTable(app, inputArray[1]);
             }
-            if (command.equals(COMMAND.DELETE)) {
+            else if (command.equals(COMMAND.DELETE)) {
                 // valid arguments check
                 if (inputArray.length != 2) {
                     System.out.println("Invalid arguments");
                 } else {
                     // they knew the id
-                    // ex. delete milotic 3
+                    // ex. delete 3
                     try {
-                        Integer.parseInt(inputArray[1]);
                         int count = app.selectID(Integer.parseInt(inputArray[1]), "pokemon");
                         if (count == 0) {
                             System.out.println("This ID is not in the database");
@@ -505,45 +524,82 @@ public class Pokemon_DB {
                             app.delete(ID, "pokemon");
                             System.out.println("DELETED");
                         }
-
                     }
                 }
             }
-            if (command.equals(COMMAND.UPDATE)) {
+            else if (command.equals(COMMAND.UPDATE)) {
                 // once again there may be multiple, need to have user specify which one by ID
                 // ex. update [pokemon_name]
                 // print which one? while listing all of them
                 // specify the id
                 // then do [column] = [new val]
+                if (inputArray.length != 2) {
+                    System.out.println("Invalid arguments");
+                }
                 if (inputArray.length == 2) {
-                    System.out.println("Please enter the ID of the pokemon you want to update");
-                    app.selectName(inputArray[1], "pokemon");
-                    System.out.print(">");
-                    int ID = Integer.parseInt(scan.nextLine());
-                    System.out.println("Please enter which categories you wish to update");
-                    System.out.print(">");
-                    String category_args = scan.nextLine();
-                    String[] categories = category_args.split(" ");
-                    for (String category : categories) {
-                        System.out.println("Category: " + category);
-                        System.out.println("Enter new value: ");
-                        System.out.print(">");
-                        String val = scan.nextLine();
-                        if (category.equals("item") || category.equals("name") || category.equals("move1") ||
-                                category.equals("move2") || category.equals("move3") || category.equals("move4")) {
-                            app.update(ID, category, val, "pokemon", false);
+                    try {
+                        int count = app.selectID(Integer.parseInt(inputArray[1]), "pokemon");
+                        if (count == 0) {
+                            System.out.println("This ID is not in the database");
                         } else {
-                            app.update(ID, category, val, "pokemon", true);
+                            int ID = Integer.parseInt(inputArray[1]);
+                            System.out.println("Please enter which categories you wish to update");
+                            System.out.print(">");
+                            String category_args = scan.nextLine();
+                            String[] categories = category_args.split(" ");
+                            for (String category : categories) {
+                                System.out.println("Category: " + category);
+                                System.out.println("Enter new value: ");
+                                System.out.print(">");
+                                String val = scan.nextLine();
+                                if (category.equals("item") || category.equals("name") || category.equals("move1") ||
+                                        category.equals("move2") || category.equals("move3") || category.equals("move4")) {
+                                    app.update(ID, category, val, "pokemon", false);
+                                } else {
+                                    app.update(ID, category, val, "pokemon", true);
+                                }
+                            }
+                            System.out.println("UPDATED");
+                        }
+                    } catch (java.lang.NumberFormatException n) {
+                        // we don't know specific id prompt user for it
+                        // ex.update milotic
+                        // POKEMON MAY NOT EVEN EXIST
+                        int count = app.selectName(inputArray[1], "pokemon");
+                        if (count == 0) {
+                            System.out.println("This pokemon is not in the database");
+                        } else {
+                            System.out.println("Please enter the ID of the pokemon you want to update");
+                            app.selectName(inputArray[1], "pokemon");
+                            System.out.print(">");
+                            int ID = Integer.parseInt(scan.nextLine());
+                            System.out.println("Please enter which categories you wish to update");
+                            System.out.print(">");
+                            String category_args = scan.nextLine();
+                            String[] categories = category_args.split(" ");
+                            for (String category : categories) {
+                                System.out.println("Category: " + category);
+                                System.out.println("Enter new value: ");
+                                System.out.print(">");
+                                String val = scan.nextLine();
+                                if (category.equals("item") || category.equals("name") || category.equals("move1") ||
+                                        category.equals("move2") || category.equals("move3") || category.equals("move4")) {
+                                    app.update(ID, category, val, "pokemon", false);
+                                } else {
+                                    app.update(ID, category, val, "pokemon", true);
+                                }
+                            }
+                            System.out.println("UPDATED");
                         }
                     }
-                    System.out.println("UPDATED");
-
+                } else {
+                    System.out.println("Invalid Argument");
                 }
             }
-            if (command.equals(COMMAND.ALL)) {
+            else if (command.equals(COMMAND.ALL)) {
                 app.selectAll("pokemon");
             }
-            if (command.equals(COMMAND.DELETEALL)) {
+            else if (command.equals(COMMAND.DELETEALL)) {
                 System.out.println("Are you sure? (y/n)");
                 System.out.print(">");
                 String answer = scan.nextLine();
@@ -556,7 +612,7 @@ public class Pokemon_DB {
                     System.out.println("Invalid Response, returning to main");
                 }
             }
-            if (command.equals(COMMAND.EXIT)) {
+            else if (command.equals(COMMAND.EXIT)) {
                 return;
             }
         }
