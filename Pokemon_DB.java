@@ -3,7 +3,7 @@ import java.util.Scanner;
 
 public class Pokemon_DB {
     public enum COMMAND {
-        GET, HELP, INSERT, DELETE, UPDATE, EXIT, ALL, DELETEALL, AVG, MAX, SIZE;
+        GET, HELP, INSERT, DELETE, UPDATE, EXIT, ALL, DELETEALL, AVG, MAX, MIN, SIZE;
     }
 
     public enum CATEGORY {
@@ -361,8 +361,8 @@ public class Pokemon_DB {
     }
 
     public void avg(String tableName) {
-        String sql = "SELECT AVG(hp) as hp, AVG(attack) as attack, AVG(defense) as defense, AVG(spattack) as spattack," +
-                " AVG(spdefense) as spdefense, AVG(speed) as speed FROM " + tableName;
+        String sql = "SELECT ROUND(AVG(hp),2) as hp, ROUND(AVG(attack),2) as attack, ROUND(AVG(defense),2) as defense, " +
+                "ROUND(AVG(spattack),2) as spattack, ROUND(AVG(spdefense),2) as spdefense, ROUND(AVG(speed),2) as speed FROM " + tableName;
         System.out.println(String.format("%10s %10s %10s %10s %10s %10s",
                 "HP", "Attack", "Defense", "Sp. Attack", "Sp. Defense", "Speed"));
         try (Connection conn = this.connect();
@@ -370,12 +370,13 @@ public class Pokemon_DB {
              ResultSet rs    = stmt.executeQuery(sql)){
              while (rs.next()) {
                  System.out.println(String.format("%10s %10s %10s %10s %10s %10s",
-                        rs.getInt("hp"),
-                        rs.getInt("attack"),
-                        rs.getInt("defense"),
-                        rs.getInt("spattack"),
-                        rs.getInt("spdefense"),
-                        rs.getInt("speed")));
+                        rs.getDouble("hp"),
+                        rs.getDouble("attack"),
+                        rs.getDouble("defense"),
+                        rs.getDouble("spattack"),
+                        rs.getDouble("spdefense"),
+                        rs.getDouble("speed")));
+
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -384,6 +385,35 @@ public class Pokemon_DB {
 
     public void max(String stat, String tableName) {
         String sql = "SELECT * FROM " + tableName + " ORDER BY " + stat + " DESC LIMIT 1";
+        System.out.println(String.format("%2s %10s %20s %10s %10s %10s %10s %10s %5s %10s %10s %10s %10s",
+                "ID", "Name", "Item", "HP", "Attack", "Defense", "Sp. Attack", "Sp. Defense", "Speed", "Move 1",
+                "Move 2", "Move 3", "Move 4"));
+        try (Connection conn = this.connect();
+             Statement stmt  = conn.createStatement();
+             ResultSet rs    = stmt.executeQuery(sql)){
+            while (rs.next()) {
+                System.out.println(String.format("%2s %10s %20s %10s %10s %10s %10s %10s %5s %10s %10s %10s %10s",
+                        rs.getInt("id"),
+                        rs.getString("name"),
+                        rs.getString("item"),
+                        rs.getInt("hp"),
+                        rs.getInt("attack"),
+                        rs.getInt("defense"),
+                        rs.getInt("spattack"),
+                        rs.getInt("spdefense"),
+                        rs.getInt("speed"),
+                        rs.getString("move1"),
+                        rs.getString("move2"),
+                        rs.getString("move3"),
+                        rs.getString("move4")));
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    public void min(String stat, String tableName) {
+        String sql = "SELECT * FROM " + tableName + " ORDER BY " + stat + " ASC LIMIT 1";
         System.out.println(String.format("%2s %10s %20s %10s %10s %10s %10s %10s %5s %10s %10s %10s %10s",
                 "ID", "Name", "Item", "HP", "Attack", "Defense", "Sp. Attack", "Sp. Defense", "Speed", "Move 1",
                 "Move 2", "Move 3", "Move 4"));
@@ -464,6 +494,7 @@ public class Pokemon_DB {
         if (com.equals("deleteall")) return COMMAND.DELETEALL;
         if (com.equals("avg")) return COMMAND.AVG;
         if (com.equals("max")) return COMMAND.MAX;
+        if (com.equals("min")) return COMMAND.MIN;
         if (com.equals("size")) return COMMAND.SIZE;
         else return null;
     }
@@ -531,6 +562,21 @@ public class Pokemon_DB {
                     else if (stat.equals(CATEGORY.SPATTACK)) app.max("spattack", "pokemon");
                     else if (stat.equals(CATEGORY.DEFENSE)) app.max("defense", "pokemon");
                     else if (stat.equals(CATEGORY.SPDEFENSE)) app.max("spdefense", "pokemon");
+                    else System.out.println("Invalid Command");
+                }
+            }
+            else if (command.equals(COMMAND.MIN)) {
+                if (inputArray.length !=2) {
+                    System.out.println("Invalid Arguments");
+                } else {
+                    CATEGORY stat = parseCategory(input);
+                    if (stat.equals(null)) System.out.println("Invalid Argument");
+                    else if (stat.equals(CATEGORY.SPEED)) app.min("speed", "pokemon");
+                    else if (stat.equals(CATEGORY.HP)) app.min("hp", "pokemon");
+                    else if (stat.equals(CATEGORY.ATTACK)) app.min("attack", "pokemon");
+                    else if (stat.equals(CATEGORY.SPATTACK)) app.min("spattack", "pokemon");
+                    else if (stat.equals(CATEGORY.DEFENSE)) app.min("defense", "pokemon");
+                    else if (stat.equals(CATEGORY.SPDEFENSE)) app.min("spdefense", "pokemon");
                     else System.out.println("Invalid Command");
                 }
             }
