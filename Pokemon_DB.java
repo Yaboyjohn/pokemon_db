@@ -493,7 +493,7 @@ public class Pokemon_DB {
         app.connect();
         Scanner scan = new Scanner(System.in);
         while (true) {
-            System.out.print(">");
+            System.out.print("MAIN>");
             String input = scan.nextLine();
             String argument = getArgument(input);
             COMMAND command = parseCommand(input);
@@ -590,10 +590,17 @@ public class Pokemon_DB {
                             System.out.println("This pokemon is not in the database");
                         } else {
                             System.out.println("Please enter the ID of the pokemon you want to update");
-                            System.out.print(">");
-                            int ID = Integer.parseInt(scan.nextLine());
-                            app.delete(ID, "pokemon");
-                            System.out.println("DELETED");
+                            System.out.print("DELETE>");
+                            String usr_input = scan.nextLine();
+                            if (usr_input.equals("cancel")) {
+                                System.out.println("DELETE CANCELLED");
+                            } else {
+                                // if they pass in a string, program errors
+                                // ID may not even be in the database
+                                int ID = Integer.parseInt(usr_input);
+                                app.delete(ID, "pokemon");
+                                System.out.println("DELETED");
+                            }
                         }
                     }
                 }
@@ -615,22 +622,27 @@ public class Pokemon_DB {
                         } else {
                             int ID = Integer.parseInt(inputArray[1]);
                             System.out.println("Please enter which categories you wish to update");
-                            System.out.print(">");
+                            System.out.print("UPDATE>");
                             String category_args = scan.nextLine();
                             String[] categories = category_args.split(" ");
-                            for (String category : categories) {
-                                System.out.println("Category: " + category);
-                                System.out.println("Enter new value: ");
-                                System.out.print(">");
-                                String val = scan.nextLine();
-                                if (category.equals("item") || category.equals("name") || category.equals("move1") ||
-                                        category.equals("move2") || category.equals("move3") || category.equals("move4")) {
-                                    app.update(ID, category, val, "pokemon", false);
-                                } else {
-                                    app.update(ID, category, val, "pokemon", true);
+                            if (categories[0].equals("cancel")) {
+                                System.out.println("UPDATE CANCELLED");
+                            } else {
+                                // user specificed categories may not even be real categories
+                                for (String category : categories) {
+                                    System.out.println("Category: " + category);
+                                    System.out.println("Enter new value: ");
+                                    System.out.print("UPDATE>");
+                                    String val = scan.nextLine();
+                                    if (category.equals("item") || category.equals("name") || category.equals("move1") ||
+                                            category.equals("move2") || category.equals("move3") || category.equals("move4")) {
+                                        app.update(ID, category, val, "pokemon", false);
+                                    } else {
+                                        app.update(ID, category, val, "pokemon", true);
+                                    }
                                 }
+                                System.out.println("UPDATED");
                             }
-                            System.out.println("UPDATED");
                         }
                     } catch (java.lang.NumberFormatException n) {
                         // we don't know specific id prompt user for it
@@ -641,25 +653,33 @@ public class Pokemon_DB {
                             System.out.println("This pokemon is not in the database");
                         } else {
                             System.out.println("Please enter the ID of the pokemon you want to update");
-                            System.out.print(">");
-                            int ID = Integer.parseInt(scan.nextLine());
-                            System.out.println("Please enter which categories you wish to update");
-                            System.out.print(">");
-                            String category_args = scan.nextLine();
-                            String[] categories = category_args.split(" ");
-                            for (String category : categories) {
-                                System.out.println("Category: " + category);
-                                System.out.println("Enter new value: ");
-                                System.out.print(">");
-                                String val = scan.nextLine();
-                                if (category.equals("item") || category.equals("name") || category.equals("move1") ||
-                                        category.equals("move2") || category.equals("move3") || category.equals("move4")) {
-                                    app.update(ID, category, val, "pokemon", false);
-                                } else {
-                                    app.update(ID, category, val, "pokemon", true);
+                            System.out.print("UPDATE>");
+                            String usr_input = scan.nextLine();
+                            if (usr_input.equals("cancel")) System.out.println("UPDATE CANCELLED");
+                            else {
+                                int ID = Integer.parseInt(usr_input);
+                                System.out.println("Please enter which categories you wish to update");
+                                System.out.print("UPDATE>");
+                                String usr_input2 = scan.nextLine();
+                                if (usr_input2.equals("cancel")) System.out.println("UPDATE CANCELLED");
+                                else {
+                                    String category_args = scan.nextLine();
+                                    String[] categories = category_args.split(" ");
+                                    for (String category : categories) {
+                                        System.out.println("Category: " + category);
+                                        System.out.println("Enter new value: ");
+                                        System.out.print("UPDATE>");
+                                        String val = scan.nextLine();
+                                        if (category.equals("item") || category.equals("name") || category.equals("move1") ||
+                                                category.equals("move2") || category.equals("move3") || category.equals("move4")) {
+                                            app.update(ID, category, val, "pokemon", false);
+                                        } else {
+                                            app.update(ID, category, val, "pokemon", true);
+                                        }
+                                    }
+                                    System.out.println("UPDATED");
                                 }
                             }
-                            System.out.println("UPDATED");
                         }
                     }
                 } else {
@@ -671,7 +691,7 @@ public class Pokemon_DB {
             }
             else if (command.equals(COMMAND.DELETEALL)) {
                 System.out.println("Are you sure? (y/n)");
-                System.out.print(">");
+                System.out.print("DELETEALL>");
                 String answer = scan.nextLine();
                 if (answer.equals("y")) {
                     app.deleteall("pokemon");
