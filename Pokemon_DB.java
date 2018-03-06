@@ -3,7 +3,7 @@ import java.util.Scanner;
 
 public class Pokemon_DB {
     public enum COMMAND {
-        GET, HELP, INSERT, DELETE, UPDATE, EXIT, ALL, DELETEALL, AVG, MAX, MIN, SIZE;
+        GET, HELP, INSERT, DELETE, UPDATE, EXIT, ALL, DELETEALL, AVG, MAX, MIN, SIZE, SQL;
     }
 
     public enum CATEGORY {
@@ -45,7 +45,7 @@ public class Pokemon_DB {
         String sql = "CREATE TABLE IF NOT EXISTS " + tableName + "(\n"
                 + "	id integer PRIMARY KEY,\n"
                 + "	name text NOT NULL,\n"
-                + "	item test NOT NULL, \n"
+                + "	item text NOT NULL, \n"
                 + "	hp integer NOT NULL,\n"
                 + "	attack integer NOT NULL,\n"
                 + "	defense integer NOT NULL,\n"
@@ -441,6 +441,26 @@ public class Pokemon_DB {
         }
     }
 
+    public void sql(String sql) {
+        try (Connection conn = this.connect();
+             Statement stmt  = conn.createStatement();
+             ResultSet rs    = stmt.executeQuery(sql))
+        {
+            while (rs.next()) {
+                ResultSetMetaData meta = rs.getMetaData();
+                int numColumns = meta.getColumnCount();
+                for (int i = 1; i <= numColumns; i++) {
+                    String colType = meta.getColumnTypeName(i);
+                    if (colType.equals("TEST") || colType.equals("TEXT")) System.out.print(rs.getString(i) + "|");
+                    else if (colType.equals("INTEGER")) System.out.print(rs.getInt(i) + "|");
+                }
+                System.out.println("");
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
     public void size(String tableName) {
         String sql = "SELECT COUNT(*) as count FROM " + tableName;
         try (Connection conn = this.connect();
@@ -496,6 +516,7 @@ public class Pokemon_DB {
         if (com.equals("max")) return COMMAND.MAX;
         if (com.equals("min")) return COMMAND.MIN;
         if (com.equals("size")) return COMMAND.SIZE;
+        if (com.equals("sql")) return COMMAND.SQL;
         else return null;
     }
 
@@ -549,6 +570,12 @@ public class Pokemon_DB {
             }
             else if (command.equals(COMMAND.AVG)) {
                 app.avg("pokemon");
+            }
+            else if (command.equals(COMMAND.SQL)) {
+                System.out.println("PLease enter your sql statement");
+                System.out.print("SQL>");
+                String sql = scan.nextLine();
+                app.sql(sql);
             }
             else if (command.equals(COMMAND.MAX)) {
                 if (inputArray.length !=2) {
@@ -721,11 +748,10 @@ public class Pokemon_DB {
                                 int ID = Integer.parseInt(usr_input);
                                 System.out.println("Please enter which categories you wish to update");
                                 System.out.print("UPDATE>");
-                                String usr_input2 = scan.nextLine();
-                                if (usr_input2.equals("cancel")) System.out.println("UPDATE CANCELLED");
+                                String category_args = scan.nextLine();
+                                String[] categories = category_args.split(" ");
+                                if (category_args.equals("cancel")) System.out.println("UPDATE CANCELLED");
                                 else {
-                                    String category_args = scan.nextLine();
-                                    String[] categories = category_args.split(" ");
                                     for (String category : categories) {
                                         System.out.println("Category: " + category);
                                         System.out.println("Enter new value: ");
