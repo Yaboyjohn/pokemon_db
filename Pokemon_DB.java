@@ -94,12 +94,12 @@ public class Pokemon_DB {
                 System.out.println(tableName + " table has no entries");
                 return;
             }
-            System.out.println(String.format("%2s %10s %20s %10s %10s %10s %10s %10s %5s %10s %10s %10s %10s",
-                    "ID", "Name", "Item", "HP", "Attack", "Defense", "Sp. Attack", "Sp. Defense", "Speed", "Move 1",
-                    "Move 2", "Move 3", "Move 4"));
+            System.out.printf("%-8s%-13s%-15s%-10s%-10s%-10s%-10s%-10s%-10s%-13s%-13s%-13s%-13s\n",
+                    "ID", "Name", "Item", "HP", "Attack", "Defense", "Sp.Attack", "Sp.Def", "Speed", "Move 1",
+                    "Move 2", "Move 3", "Move 4");
             // loop through the result set
             while (rs.next()) {
-                System.out.println(String.format("%2s %10s %20s %10s %10s %10s %10s %10s %5s %10s %10s %10s %10s",
+                System.out.printf("%-8s%-13s%-15s%-10s%-10s%-10s%-10s%-10s%-10s%-13s%-13s%-13s%-13s\n",
                         rs.getInt("id"),
                         rs.getString("name"),
                         rs.getString("item"),
@@ -112,7 +112,7 @@ public class Pokemon_DB {
                         rs.getString("move1"),
                         rs.getString("move2"),
                         rs.getString("move3"),
-                        rs.getString("move4")));
+                        rs.getString("move4"));
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -179,21 +179,25 @@ public class Pokemon_DB {
         try (Connection conn = this.connect();
              Statement stmt  = conn.createStatement();
              ResultSet rs    = stmt.executeQuery(sql)){
+            System.out.printf("%-8s%-13s%-15s%-10s%-10s%-10s%-10s%-10s%-10s%-13s%-13s%-13s%-13s\n",
+                    "ID", "Name", "Item", "HP", "Attack", "Defense", "Sp.Attack", "Sp.Def", "Speed", "Move 1",
+                    "Move 2", "Move 3", "Move 4");
             while (rs.next()) {
                 count++;
-                System.out.println(rs.getInt("id") +  "\t" +
-                        rs.getString("name") + "\t" +
-                        rs.getString("item") + "\t" +
-                        rs.getInt("hp") + "\t" +
-                        rs.getInt("attack") + "\t" +
-                        rs.getInt("defense") + "\t" +
-                        rs.getInt("spattack") + "\t" +
-                        rs.getInt("spdefense") + "\t" +
-                        rs.getInt("speed") + "\t" +
-                        rs.getString("move1") + "        " +
-                        rs.getString("move2") + "        " +
-                        rs.getString("move3") + "        " +
-                        rs.getString("move4") + "\t");
+                System.out.printf("%-8s%-13s%-15s%-10s%-10s%-10s%-10s%-10s%-10s%-13s%-13s%-13s%-13s\n",
+                        rs.getInt("id"),
+                        rs.getString("name"),
+                        rs.getString("item"),
+                        rs.getInt("hp"),
+                        rs.getInt("attack"),
+                        rs.getInt("defense"),
+                        rs.getInt("spattack"),
+                        rs.getInt("spdefense"),
+                        rs.getInt("speed"),
+                        rs.getString("move1"),
+                        rs.getString("move2"),
+                        rs.getString("move3"),
+                        rs.getString("move4"));
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -206,22 +210,26 @@ public class Pokemon_DB {
         int count = 0;
         try (Connection conn = this.connect();
              Statement stmt  = conn.createStatement();
-             ResultSet rs    = stmt.executeQuery(sql)){
-            while (rs.next()) {
+             ResultSet rs    = stmt.executeQuery(sql)) {
+            System.out.printf("%-8s%-13s%-15s%-10s%-10s%-10s%-10s%-10s%-10s%-13s%-13s%-13s%-13s\n",
+                    "ID", "Name", "Item", "HP", "Attack", "Defense", "Sp.Attack", "Sp.Def", "Speed", "Move 1",
+                    "Move 2", "Move 3", "Move 4");
+             while (rs.next()) {
                 count++;
-                System.out.println(rs.getInt("id") +  "\t" +
-                        rs.getString("name") + "\t" +
-                        rs.getString("item") + "\t" +
-                        rs.getInt("hp") + "\t" +
-                        rs.getInt("attack") + "\t" +
-                        rs.getInt("defense") + "\t" +
-                        rs.getInt("spattack") + "\t" +
-                        rs.getInt("spdefense") + "\t" +
-                        rs.getInt("speed") + "\t" +
-                        rs.getString("move1") + "        " +
-                        rs.getString("move2") + "        " +
-                        rs.getString("move3") + "        " +
-                        rs.getString("move4") + "\t");
+                 System.out.printf("%-8s%-13s%-15s%-10s%-10s%-10s%-10s%-10s%-10s%-13s%-13s%-13s%-13s\n",
+                         rs.getInt("id"),
+                         rs.getString("name"),
+                         rs.getString("item"),
+                         rs.getInt("hp"),
+                         rs.getInt("attack"),
+                         rs.getInt("defense"),
+                         rs.getInt("spattack"),
+                         rs.getInt("spdefense"),
+                         rs.getInt("speed"),
+                         rs.getString("move1"),
+                         rs.getString("move2"),
+                         rs.getString("move3"),
+                         rs.getString("move4"));
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -237,21 +245,25 @@ public class Pokemon_DB {
         try (Connection conn = this.connect();
              Statement stmt  = conn.createStatement();
              ResultSet rs    = stmt.executeQuery(sql)){
+            System.out.printf("%-8s%-13s%-15s%-10s%-10s%-10s%-10s%-10s%-10s%-13s%-13s%-13s%-13s\n",
+                    "ID", "Name", "Item", "HP", "Attack", "Defense", "Sp.Attack", "Sp.Def", "Speed", "Move 1",
+                    "Move 2", "Move 3", "Move 4");
             while (rs.next()) {
                 count++;
-                System.out.println(rs.getInt("id") +  "\t" +
-                        rs.getString("name") + "\t" +
-                        rs.getString("item") + "\t" +
-                        rs.getInt("hp") + "\t" +
-                        rs.getInt("attack") + "\t" +
-                        rs.getInt("defense") + "\t" +
-                        rs.getInt("spattack") + "\t" +
-                        rs.getInt("spdefense") + "\t" +
-                        rs.getInt("speed") + "\t" +
-                        rs.getString("move1") + "        " +
-                        rs.getString("move2") + "        " +
-                        rs.getString("move3") + "        " +
-                        rs.getString("move4") + "\t");
+                System.out.printf("%-8s%-13s%-15s%-10s%-10s%-10s%-10s%-10s%-10s%-13s%-13s%-13s%-13s\n",
+                        rs.getInt("id"),
+                        rs.getString("name"),
+                        rs.getString("item"),
+                        rs.getInt("hp"),
+                        rs.getInt("attack"),
+                        rs.getInt("defense"),
+                        rs.getInt("spattack"),
+                        rs.getInt("spdefense"),
+                        rs.getInt("speed"),
+                        rs.getString("move1"),
+                        rs.getString("move2"),
+                        rs.getString("move3"),
+                        rs.getString("move4"));
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -259,29 +271,36 @@ public class Pokemon_DB {
         return count;
     }
 
-    public void selectStat(String stat, String operator, int num, String tableName) {
+    public int selectStat(String stat, String operator, int num, String tableName) {
         String sql = "SELECT * FROM " + tableName + " WHERE " + stat + " " + operator + " " + num + " ORDER BY " + stat + " DESC";
+        int count = 0;
         try (Connection conn = this.connect();
              Statement stmt  = conn.createStatement();
              ResultSet rs    = stmt.executeQuery(sql)){
+            System.out.printf("%-8s%-13s%-15s%-10s%-10s%-10s%-10s%-10s%-10s%-13s%-13s%-13s%-13s\n",
+                    "ID", "Name", "Item", "HP", "Attack", "Defense", "Sp.Attack", "Sp.Def", "Speed", "Move 1",
+                    "Move 2", "Move 3", "Move 4");
             while (rs.next()) {
-                System.out.println(rs.getInt("id") +  "\t" +
-                        rs.getString("name") + "\t" +
-                        rs.getString("item") + "\t" +
-                        rs.getInt("hp") + "\t" +
-                        rs.getInt("attack") + "\t" +
-                        rs.getInt("defense") + "\t" +
-                        rs.getInt("spattack") + "\t" +
-                        rs.getInt("spdefense") + "\t" +
-                        rs.getInt("speed") + "\t" +
-                        rs.getString("move1") + "        " +
-                        rs.getString("move2") + "        " +
-                        rs.getString("move3") + "        " +
-                        rs.getString("move4") + "\t");
+                count++;
+                System.out.printf("%-8s%-13s%-15s%-10s%-10s%-10s%-10s%-10s%-10s%-13s%-13s%-13s%-13s\n",
+                        rs.getInt("id"),
+                        rs.getString("name"),
+                        rs.getString("item"),
+                        rs.getInt("hp"),
+                        rs.getInt("attack"),
+                        rs.getInt("defense"),
+                        rs.getInt("spattack"),
+                        rs.getInt("spdefense"),
+                        rs.getInt("speed"),
+                        rs.getString("move1"),
+                        rs.getString("move2"),
+                        rs.getString("move3"),
+                        rs.getString("move4"));
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
+        return count;
     }
 
     public void insert(String name, String item, int hp, int attack, int defense,
@@ -363,19 +382,19 @@ public class Pokemon_DB {
     public void avg(String tableName) {
         String sql = "SELECT ROUND(AVG(hp),2) as hp, ROUND(AVG(attack),2) as attack, ROUND(AVG(defense),2) as defense, " +
                 "ROUND(AVG(spattack),2) as spattack, ROUND(AVG(spdefense),2) as spdefense, ROUND(AVG(speed),2) as speed FROM " + tableName;
-        System.out.println(String.format("%10s %10s %10s %10s %10s %10s",
-                "HP", "Attack", "Defense", "Sp. Attack", "Sp. Defense", "Speed"));
+        System.out.printf("%-10s%-10s%-10s%-10s%-10s%-10s\n",
+                "HP", "Attack", "Defense", "Sp.Attack", "Sp.Def", "Speed");
         try (Connection conn = this.connect();
              Statement stmt  = conn.createStatement();
              ResultSet rs    = stmt.executeQuery(sql)){
              while (rs.next()) {
-                 System.out.println(String.format("%10s %10s %10s %10s %10s %10s",
+                 System.out.printf("%-10s%-10s%-10s%-10s%-10s%-10s\n",
                         rs.getDouble("hp"),
                         rs.getDouble("attack"),
                         rs.getDouble("defense"),
                         rs.getDouble("spattack"),
                         rs.getDouble("spdefense"),
-                        rs.getDouble("speed")));
+                        rs.getDouble("speed"));
 
             }
         } catch (SQLException e) {
@@ -385,14 +404,14 @@ public class Pokemon_DB {
 
     public void max(String stat, String tableName) {
         String sql = "SELECT * FROM " + tableName + " ORDER BY " + stat + " DESC LIMIT 1";
-        System.out.println(String.format("%2s %10s %20s %10s %10s %10s %10s %10s %5s %10s %10s %10s %10s",
-                "ID", "Name", "Item", "HP", "Attack", "Defense", "Sp. Attack", "Sp. Defense", "Speed", "Move 1",
-                "Move 2", "Move 3", "Move 4"));
+        System.out.printf("%-8s%-13s%-15s%-10s%-10s%-10s%-10s%-10s%-10s%-13s%-13s%-13s%-13s\n",
+                "ID", "Name", "Item", "HP", "Attack", "Defense", "Sp.Attack", "Sp.Def", "Speed", "Move 1",
+                "Move 2", "Move 3", "Move 4");
         try (Connection conn = this.connect();
              Statement stmt  = conn.createStatement();
              ResultSet rs    = stmt.executeQuery(sql)){
             while (rs.next()) {
-                System.out.println(String.format("%2s %10s %20s %10s %10s %10s %10s %10s %5s %10s %10s %10s %10s",
+                System.out.printf("%-8s%-13s%-15s%-10s%-10s%-10s%-10s%-10s%-10s%-13s%-13s%-13s%-13s\n",
                         rs.getInt("id"),
                         rs.getString("name"),
                         rs.getString("item"),
@@ -405,7 +424,7 @@ public class Pokemon_DB {
                         rs.getString("move1"),
                         rs.getString("move2"),
                         rs.getString("move3"),
-                        rs.getString("move4")));
+                        rs.getString("move4"));
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -414,14 +433,14 @@ public class Pokemon_DB {
 
     public void min(String stat, String tableName) {
         String sql = "SELECT * FROM " + tableName + " ORDER BY " + stat + " ASC LIMIT 1";
-        System.out.println(String.format("%2s %10s %20s %10s %10s %10s %10s %10s %5s %10s %10s %10s %10s",
-                "ID", "Name", "Item", "HP", "Attack", "Defense", "Sp. Attack", "Sp. Defense", "Speed", "Move 1",
-                "Move 2", "Move 3", "Move 4"));
+        System.out.printf("%-8s%-13s%-15s%-10s%-10s%-10s%-10s%-10s%-10s%-13s%-13s%-13s%-13s\n",
+                "ID", "Name", "Item", "HP", "Attack", "Defense", "Sp.Attack", "Sp. Defg", "Speed", "Move 1",
+                "Move 2", "Move 3", "Move 4");
         try (Connection conn = this.connect();
              Statement stmt  = conn.createStatement();
              ResultSet rs    = stmt.executeQuery(sql)){
             while (rs.next()) {
-                System.out.println(String.format("%2s %10s %20s %10s %10s %10s %10s %10s %5s %10s %10s %10s %10s",
+                System.out.printf("%-8s%-13s%-15s%-10s%-10s%-10s%-10s%-10s%-10s%-13s%-13s%-13s%-13s\n",
                         rs.getInt("id"),
                         rs.getString("name"),
                         rs.getString("item"),
@@ -434,7 +453,7 @@ public class Pokemon_DB {
                         rs.getString("move1"),
                         rs.getString("move2"),
                         rs.getString("move3"),
-                        rs.getString("move4")));
+                        rs.getString("move4"));
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -498,7 +517,6 @@ public class Pokemon_DB {
         String move4 = scan.nextLine();
         db.insert(pokemon_name, item, hp, attack, defense, spAttack, spDefense, speed, move1, move2, move3, move4);
         System.out.println("SAVED");
-
     }
 
     public static COMMAND parseCommand(String input) {
@@ -612,6 +630,12 @@ public class Pokemon_DB {
                     System.out.println("Invalid Arguments");
                 }
                 // This is getting a single pokemon ex. get suicune
+                else if (input.equals("get mr. mime")) {
+                    int count = app.selectName("Mr. Mime", "pokemon");
+                    if (count <= 0) {
+                        System.out.println("This pokemon is not in the database");
+                    }
+                }
                 else if (inputArray.length == 2) {
                     int count = app.selectName(inputArray[1], "pokemon");
                     if (count <= 0) {
@@ -633,7 +657,7 @@ public class Pokemon_DB {
                     else if (category.equals(CATEGORY.MOVE)) {
                         int count = app.selectMove(argument, "pokemon");
                         if (count == 0) {
-                            System.out.println("This move is not in the database");
+                            System.out.println("No pokemon satisfied the given parameters");
                         }
                     }
                     // get hp > 300, get hp = 300, get hp >= 300
@@ -642,7 +666,10 @@ public class Pokemon_DB {
                         String stat = inputArray[1];
                         String operator = parseStat(input)[0];
                         int num = Integer.parseInt(parseStat(input)[1]);
-                        app.selectStat(stat, operator, num, "pokemon");
+                        int count = app.selectStat(stat, operator, num, "pokemon");
+                        if (count == 0) {
+                            System.out.println("This item is not in the database");
+                        }
                     } else {
                         System.out.println("Invalid Arguments");
                     }
