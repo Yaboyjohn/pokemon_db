@@ -2,12 +2,33 @@ import java.sql.*;
 import java.util.Scanner;
 
 public class Pokemon_DB {
+    public static final String ANSI_RESET = "\u001B[0m";
+    public static final String ANSI_BLACK = "\u001B[30m";
+    public static final String ANSI_RED = "\u001B[31m";
+    public static final String ANSI_GREEN = "\u001B[32m";
+    public static final String ANSI_YELLOW = "\u001B[33m";
+    public static final String ANSI_BLUE = "\u001B[34m";
+    public static final String ANSI_PURPLE = "\u001B[35m";
+    public static final String ANSI_CYAN = "\u001B[36m";
+    public static final String ANSI_WHITE = "\u001B[37m";
+    //USAGE: System.out.println(ANSI_RED + "This text is red!" + ANSI_RESET);
+
     public enum COMMAND {
-        GET, HELP, INSERT, DELETE, UPDATE, EXIT, ALL, DELETEALL, AVG, MAX, MIN, SIZE, SQL;
+        GET, HELP, INSERT, DELETE, UPDATE, EXIT, ALL, DELETEALL, AVG, MAX, MIN, SIZE, SQL, SORT;
     }
 
     public enum CATEGORY {
         ITEM, HP, ATTACK, DEFENSE, SPATTACK, SPDEFENSE, SPEED, MOVE;
+
+        public String toString() {
+            if (this.equals(CATEGORY.HP)) return "hp";
+            else if (this.equals(CATEGORY.ATTACK)) return "attack";
+            else if (this.equals(CATEGORY.DEFENSE)) return "defense";
+            else if (this.equals(CATEGORY.SPATTACK)) return "spattack";
+            else if (this.equals(CATEGORY.SPDEFENSE)) return "spdefense";
+            else if (this.equals(CATEGORY.SPEED)) return "speed";
+            else return null;
+        }
     }
 
     private Connection connect() {
@@ -491,6 +512,35 @@ public class Pokemon_DB {
         }
     }
 
+    public void sort(String stat, String tableName) {
+        String sql = "SELECT * FROM " + tableName + " ORDER BY " + stat + " ASC";
+        System.out.printf("%-8s%-13s%-15s%-10s%-10s%-10s%-10s%-10s%-10s%-13s%-13s%-13s%-13s\n",
+                "ID", "Name", "Item", "HP", "Attack", "Defense", "Sp.Attack", "Sp. Defg", "Speed", "Move 1",
+                "Move 2", "Move 3", "Move 4");
+        try (Connection conn = this.connect();
+             Statement stmt  = conn.createStatement();
+             ResultSet rs    = stmt.executeQuery(sql)){
+            while (rs.next()) {
+                System.out.printf("%-8s%-13s%-15s%-10s%-10s%-10s%-10s%-10s%-10s%-13s%-13s%-13s%-13s\n",
+                        rs.getInt("id"),
+                        rs.getString("name"),
+                        rs.getString("item"),
+                        rs.getInt("hp"),
+                        rs.getInt("attack"),
+                        rs.getInt("defense"),
+                        rs.getInt("spattack"),
+                        rs.getInt("spdefense"),
+                        rs.getInt("speed"),
+                        rs.getString("move1"),
+                        rs.getString("move2"),
+                        rs.getString("move3"),
+                        rs.getString("move4"));
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
     public static void insertToTable(Pokemon_DB db, String pokemon_name) {
         Scanner scan = new Scanner(System.in);
         System.out.print("Item: ");
@@ -535,6 +585,7 @@ public class Pokemon_DB {
         if (com.equals("min")) return COMMAND.MIN;
         if (com.equals("size")) return COMMAND.SIZE;
         if (com.equals("sql")) return COMMAND.SQL;
+        if (com.equals("sort")) return COMMAND.SORT;
         else return null;
     }
 
@@ -583,6 +634,14 @@ public class Pokemon_DB {
             if (command == null) {
                 System.out.println("Invalid Command");
             }
+            else if (command.equals(COMMAND.SORT)) {
+                if (inputArray.length != 2) {
+                    System.out.println("Invalid Arguments");
+                } else {
+                    CATEGORY stat = parseCategory(input);
+                    app.sort(stat.toString(), "pokemon");
+                }
+            }
             else if (command.equals(COMMAND.SIZE)) {
                 app.size("pokemon");
             }
@@ -601,13 +660,9 @@ public class Pokemon_DB {
                 } else {
                     CATEGORY stat = parseCategory(input);
                     if (stat.equals(null)) System.out.println("Invalid Argument");
-                    else if (stat.equals(CATEGORY.SPEED)) app.max("speed", "pokemon");
-                    else if (stat.equals(CATEGORY.HP)) app.max("hp", "pokemon");
-                    else if (stat.equals(CATEGORY.ATTACK)) app.max("attack", "pokemon");
-                    else if (stat.equals(CATEGORY.SPATTACK)) app.max("spattack", "pokemon");
-                    else if (stat.equals(CATEGORY.DEFENSE)) app.max("defense", "pokemon");
-                    else if (stat.equals(CATEGORY.SPDEFENSE)) app.max("spdefense", "pokemon");
-                    else System.out.println("Invalid Command");
+                    else {
+                        app.max(stat.toString(), "pokemon");
+                    }
                 }
             }
             else if (command.equals(COMMAND.MIN)) {
@@ -616,13 +671,9 @@ public class Pokemon_DB {
                 } else {
                     CATEGORY stat = parseCategory(input);
                     if (stat.equals(null)) System.out.println("Invalid Argument");
-                    else if (stat.equals(CATEGORY.SPEED)) app.min("speed", "pokemon");
-                    else if (stat.equals(CATEGORY.HP)) app.min("hp", "pokemon");
-                    else if (stat.equals(CATEGORY.ATTACK)) app.min("attack", "pokemon");
-                    else if (stat.equals(CATEGORY.SPATTACK)) app.min("spattack", "pokemon");
-                    else if (stat.equals(CATEGORY.DEFENSE)) app.min("defense", "pokemon");
-                    else if (stat.equals(CATEGORY.SPDEFENSE)) app.min("spdefense", "pokemon");
-                    else System.out.println("Invalid Command");
+                    else {
+                        app.min(stat.toString(), "pokemon");
+                    }
                 }
             }
             else if (command.equals(COMMAND.GET)) {
