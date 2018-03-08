@@ -18,7 +18,7 @@ public class Pokemon_DB {
     }
 
     public enum CATEGORY {
-        ITEM, HP, ATTACK, DEFENSE, SPATTACK, SPDEFENSE, SPEED, MOVE;
+        ITEM, HP, ATTACK, DEFENSE, SPATTACK, SPDEFENSE, SPEED, MOVE, ID;
 
         public String toString() {
             if (this.equals(CATEGORY.HP)) return "hp";
@@ -100,11 +100,14 @@ public class Pokemon_DB {
 
     }
 
-    public void selectAll(String tableName){
+    public void selectAll(String tableName, boolean orderById){
         String emptyCheck = "SELECT count(*) FROM " + tableName;
-        //String sql = "SELECT id, name, hp, attack, defense, spattack, spdefense, speed, move1, move2, move3, move4 FROM " + tableName;
-        String sql = "SELECT * FROM " + tableName + " ORDER BY name";
-
+        String sql;
+        if (orderById) {
+            sql = "SELECT * FROM " + tableName + " ORDER BY id";
+        } else {
+            sql = "SELECT * FROM " + tableName + " ORDER BY name";
+        }
         try (Connection conn = this.connect();
              Statement stmt  = conn.createStatement();
              Statement stmt2 = conn.createStatement();
@@ -135,31 +138,6 @@ public class Pokemon_DB {
                         rs.getString("move3"),
                         rs.getString("move4"));
             }
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
-    }
-
-    public void selectColumn(String colName, String tableName) {
-        String sql = "SELECT name" + colName + " FROM " + tableName;
-        try (Connection conn = this.connect();
-             Statement stmt  = conn.createStatement();
-             ResultSet rs    = stmt.executeQuery(sql)){
-             while (rs.next()) {
-                 System.out.println(rs.getInt("id") +  "\t" +
-                         rs.getString("name") + "\t" +
-                         rs.getString("item") + "\t" +
-                         rs.getInt("hp") + "\t" +
-                         rs.getInt("attack") + "\t" +
-                         rs.getInt("defense") + "\t" +
-                         rs.getInt("spattack") + "\t" +
-                         rs.getInt("spdefense") + "\t" +
-                         rs.getInt("speed") + "\t" +
-                         rs.getString("move1") + "        " +
-                         rs.getString("move2") + "        " +
-                         rs.getString("move3") + "        " +
-                         rs.getString("move4") + "\t");
-             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
@@ -600,6 +578,7 @@ public class Pokemon_DB {
         if (com.equals("spdefense")) return CATEGORY.SPDEFENSE;
         if (com.equals("speed")) return CATEGORY.SPEED;
         if (com.equals("move")) return CATEGORY.MOVE;
+        if (com.equals("id")) return CATEGORY.ID;
         else return null;
     }
 
@@ -852,7 +831,14 @@ public class Pokemon_DB {
                 }
             }
             else if (command.equals(COMMAND.ALL)) {
-                app.selectAll("pokemon");
+                if (inputArray.length == 1) {
+                    app.selectAll("pokemon", false);
+                } else if (inputArray.length == 2) {
+                    CATEGORY category = parseCategory(input);
+                    app.selectAll("pokemon", true);
+                } else {
+                    System.out.println("Invalid Command");
+                }
             }
             else if (command.equals(COMMAND.DELETEALL)) {
                 System.out.println("Are you sure? (y/n)");
