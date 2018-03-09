@@ -12,6 +12,16 @@ public class Pokemon_DB {
     public static final String ANSI_CYAN = "\u001B[36m";
     public static final String ANSI_WHITE = "\u001B[37m";
     //USAGE: System.out.println(ANSI_RED + "This text is red!" + ANSI_RESET);
+    public static final String GREEN = "\033[0;32m";   // GREEN
+    public static final String RESET = "\033[0m";  // Text Reset
+    public static final String ANSI_BLACK_BACKGROUND = "\u001B[40m";
+    public static final String ANSI_RED_BACKGROUND = "\u001B[41m";
+    public static final String ANSI_GREEN_BACKGROUND = "\u001B[42m";
+    public static final String ANSI_YELLOW_BACKGROUND = "\u001B[43m";
+    public static final String ANSI_BLUE_BACKGROUND = "\u001B[44m";
+    public static final String ANSI_PURPLE_BACKGROUND = "\u001B[45m";
+    public static final String ANSI_CYAN_BACKGROUND = "\u001B[46m";
+    public static final String ANSI_WHITE_BACKGROUND = "\u001B[47m";
 
     public enum COMMAND {
         GET, HELP, INSERT, DELETE, UPDATE, EXIT, ALL, DELETEALL, AVG, MAX, MIN, SIZE, SQL, SORT;
@@ -102,6 +112,10 @@ public class Pokemon_DB {
 
     }
 
+    public static String rightPadding(String str, int num) {
+        return String.format("%1$-" + num + "s", str);
+    }
+
     public void selectAll(String tableName, boolean orderById){
         String emptyCheck = "SELECT count(*) FROM " + tableName;
         String sql;
@@ -140,6 +154,30 @@ public class Pokemon_DB {
                         rs.getString("move3"),
                         rs.getString("move4"));
             }
+
+//            System.out.print(ANSI_GREEN + "ID" + ANSI_RESET);
+//            System.out.print(rightPadding("", 8 - "ID".length()));
+//            System.out.printf("%-13s%-15s%-10s%-10s%-10s%-10s%-10s%-10s%-13s%-13s%-13s%-13s\n",
+//                    "Name", "Item", "HP", "Attack", "Defense", "Sp.Attack", "Sp.Def", "Speed", "Move 1",
+//                    "Move 2", "Move 3", "Move 4");
+//            // loop through the result set
+//            while (rs.next()) {
+//                System.out.print(ANSI_GREEN + rs.getInt("id") + ANSI_RESET);
+//                System.out.print(rightPadding("", 8 - Integer.toString(rs.getInt("id")).length()));
+//                        System.out.printf("%-13s%-15s%-10s%-10s%-10s%-10s%-10s%-10s%-13s%-13s%-13s%-13s\n",
+//                        rs.getString("name"),
+//                        rs.getString("item"),
+//                        rs.getInt("hp"),
+//                        rs.getInt("attack"),
+//                        rs.getInt("defense"),
+//                        rs.getInt("spattack"),
+//                        rs.getInt("spdefense"),
+//                        rs.getInt("speed"),
+//                        rs.getString("move1"),
+//                        rs.getString("move2"),
+//                        rs.getString("move3"),
+//                        rs.getString("move4"));
+//            }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
