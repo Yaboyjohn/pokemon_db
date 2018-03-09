@@ -134,37 +134,13 @@ public class Pokemon_DB {
                 System.out.println(tableName + " table has no entries");
                 return;
             }
-            System.out.printf("%-8s%-13s%-15s%-10s%-10s%-10s%-10s%-10s%-10s%-13s%-13s%-13s%-13s\n",
-                    "ID", "Name", "Item", "HP", "Attack", "Defense", "Sp.Attack", "Sp.Def", "Speed", "Move 1",
-                    "Move 2", "Move 3", "Move 4");
-            // loop through the result set
-            while (rs.next()) {
-                System.out.printf("%-8s%-13s%-15s%-10s%-10s%-10s%-10s%-10s%-10s%-13s%-13s%-13s%-13s\n",
-                        rs.getInt("id"),
-                        rs.getString("name"),
-                        rs.getString("item"),
-                        rs.getInt("hp"),
-                        rs.getInt("attack"),
-                        rs.getInt("defense"),
-                        rs.getInt("spattack"),
-                        rs.getInt("spdefense"),
-                        rs.getInt("speed"),
-                        rs.getString("move1"),
-                        rs.getString("move2"),
-                        rs.getString("move3"),
-                        rs.getString("move4"));
-            }
-
-//            System.out.print(ANSI_GREEN + "ID" + ANSI_RESET);
-//            System.out.print(rightPadding("", 8 - "ID".length()));
-//            System.out.printf("%-13s%-15s%-10s%-10s%-10s%-10s%-10s%-10s%-13s%-13s%-13s%-13s\n",
-//                    "Name", "Item", "HP", "Attack", "Defense", "Sp.Attack", "Sp.Def", "Speed", "Move 1",
+//            System.out.printf("%-8s%-13s%-15s%-10s%-10s%-10s%-10s%-10s%-10s%-13s%-13s%-13s%-13s\n",
+//                    "ID", "Name", "Item", "HP", "Attack", "Defense", "Sp.Attack", "Sp.Def", "Speed", "Move 1",
 //                    "Move 2", "Move 3", "Move 4");
 //            // loop through the result set
 //            while (rs.next()) {
-//                System.out.print(ANSI_GREEN + rs.getInt("id") + ANSI_RESET);
-//                System.out.print(rightPadding("", 8 - Integer.toString(rs.getInt("id")).length()));
-//                        System.out.printf("%-13s%-15s%-10s%-10s%-10s%-10s%-10s%-10s%-13s%-13s%-13s%-13s\n",
+//                System.out.printf("%-8s%-13s%-15s%-10s%-10s%-10s%-10s%-10s%-10s%-13s%-13s%-13s%-13s\n",
+//                        rs.getInt("id"),
 //                        rs.getString("name"),
 //                        rs.getString("item"),
 //                        rs.getInt("hp"),
@@ -178,6 +154,25 @@ public class Pokemon_DB {
 //                        rs.getString("move3"),
 //                        rs.getString("move4"));
 //            }
+            System.out.printf("%-8s" + ANSI_GREEN + "NAME" + ANSI_RESET + rightPadding("", 15 - "name".length()) + "%-15s%-10s%-10s%-10s%-10s%-10s%-10s%-13s%-13s%-13s%-13s\n",
+                    "ID", "Item", "HP", "Attack", "Defense", "Sp.Attack", "Sp.Def", "Speed", "Move 1",
+                    "Move 2", "Move 3", "Move 4");
+            // loop through the result set
+            while (rs.next()) {
+                        System.out.printf("%-8s" + ANSI_GREEN + rs.getString("name") + ANSI_RESET + rightPadding("", 15 - rs.getString("name").length()) + "%-15s%-10s%-10s%-10s%-10s%-10s%-10s%-13s%-13s%-13s%-13s\n",
+                                rs.getInt("id"),
+                                rs.getString("item"),
+                        rs.getInt("hp"),
+                        rs.getInt("attack"),
+                        rs.getInt("defense"),
+                        rs.getInt("spattack"),
+                        rs.getInt("spdefense"),
+                        rs.getInt("speed"),
+                        rs.getString("move1"),
+                        rs.getString("move2"),
+                        rs.getString("move3"),
+                        rs.getString("move4"));
+            }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
