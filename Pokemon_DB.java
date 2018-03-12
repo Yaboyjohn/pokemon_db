@@ -1100,12 +1100,15 @@ public class Pokemon_DB {
                     else if (category.equals(CATEGORY.MOVE)) {
                         if (inputArray.length > 4 && !input.equals("get move hi jump kick")) {
                             System.out.println("Wrong number of arguments. The GET item command follows the form: get item [item name]. " +
-                                    "Item name may be two words but no more than that.");
+                                    "Item name may be two words but no more than that unless the move is 'hi jump kick'.");
                             continue;
                         }
-                        int count = app.selectMove(argument, currTable);
-                        if (count == 0) System.out.println("This move is not in the database");
-
+                        if (!app.exists("move1", argument, currTable) && !app.exists("move2", argument, currTable) &&
+                                !app.exists("move3", argument, currTable) && !app.exists("move4", argument, currTable)) {
+                            System.out.println("This item is not in the database");
+                            continue;
+                        }
+                        app.selectMove(argument, currTable);
                     }
                     // get hp > 300, get hp = 300, get hp >= 300
                     else if (category.equals(CATEGORY.HP) || category.equals(CATEGORY.ATTACK)|| category.equals(CATEGORY.DEFENSE) ||
