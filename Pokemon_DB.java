@@ -583,11 +583,34 @@ public class Pokemon_DB {
         return res;
     }
 
+    public void maxStatIndividualPokemon(String pokemon, String tableName) {
+        String sql = "select max(hp) as hp, max(attack) as attack, max(defense) as defense, max(spattack) as spattack," +
+                " max(spdefense) as spdefense, max(speed) as speed from pokemon where name like '" + pokemon + "'";
+        try (Connection conn = this.connect();
+             Statement stmt  = conn.createStatement();
+             ResultSet rs    = stmt.executeQuery(sql)){
+            while (rs.next()) {
+                System.out.printf("%36s%-10s%-10s%-10s%-10s%-10s%-10s\n",
+                        pokemon.substring(0, 1).toUpperCase() + pokemon.substring(1) + " max: ",
+                        rs.getInt("hp"),
+                        rs.getInt("attack"),
+                        rs.getInt("defense"),
+                        rs.getInt("spattack"),
+                        rs.getInt("spdefense"),
+                        rs.getInt("speed"));
+
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
     /**
      *
      * @param pokemon (The pokemon this function retrieves to compare agains the passed in stats)
      * @param mode
      * @param tableName
+     * PRINTS OUTS ALL THE ENTRIES OF THE POKEMON PASSED IN
      */
     public void avgSelectName(String pokemon, double avgHp, double avgAttack, double avgDef,
                               double avgSpattack, double avgSpdef, double avgSpeed, int mode, String tableName) {
@@ -823,6 +846,7 @@ public class Pokemon_DB {
                                 spdefense,
                                 speed);
                     }
+                    maxStatIndividualPokemon(pokemon2, currTable);
                 } catch (SQLException e) {
                     System.out.println(e.getMessage());
                 }
@@ -966,7 +990,7 @@ public class Pokemon_DB {
             else if (command.equals(COMMAND.COMPARE)) {
                 if (inputArray.length < 2) {
                     System.out.println("Wrong number of arguments. The COMPARE command follows the " +
-                            "form: compare [pokemon1] [pokemon2] OR compare [pokemon1] all");
+                            "form: compare [pokemon1] [pokemon2] where either pokemon1 or pokemon2 can be 'all' but not both");
                     continue;
                 }
                 // ex. compare suicune
@@ -1006,13 +1030,8 @@ public class Pokemon_DB {
                                 System.out.println("Both pokemon are the same. Please enter 2 different pokemon");
                                 continue;
                             }
-                            System.out.println("############");
-                            System.out.println("############");
-                            System.out.println("############");
-                            System.out.println("############");
-                            System.out.println("############");
-                            //idea: also list the variations of pokemon2 so that one can see the stats of the 2 side by side
                             app.compare(arg1, arg2, 2, currTable);
+                            app.compare(arg2, arg1, 2, currTable);
                         }
                     }
                 } else {
@@ -1105,12 +1124,12 @@ public class Pokemon_DB {
                         }
                         if (!app.exists("move1", argument, currTable) && !app.exists("move2", argument, currTable) &&
                                 !app.exists("move3", argument, currTable) && !app.exists("move4", argument, currTable)) {
-                            System.out.println("This item is not in the database");
+                            System.out.println("This move is not in the database");
                             continue;
                         }
                         app.selectMove(argument, currTable);
                     }
-                    // get hp > 300, get hp = 300, get hp >= 300
+                    // ex. get hp > 300, get hp = 300, get hp >= 300
                     else if (category.equals(CATEGORY.HP) || category.equals(CATEGORY.ATTACK)|| category.equals(CATEGORY.DEFENSE) ||
                             category.equals(CATEGORY.SPATTACK) || category.equals(CATEGORY.SPDEFENSE) || category.equals(CATEGORY.SPEED)) {
                         String stat = inputArray[1];
