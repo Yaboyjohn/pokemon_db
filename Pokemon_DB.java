@@ -1,5 +1,7 @@
 import java.sql.*;
-import java.util.Scanner;
+import java.text.DecimalFormat;
+import java.util.*;
+import java.util.Map.Entry;
 
 public class Pokemon_DB {
     public static final String ANSI_RESET = "\u001B[0m";
@@ -25,7 +27,7 @@ public class Pokemon_DB {
     public static final String BLACK_BOLD = "\033[1;30m";
 
     public enum COMMAND {
-        GET, HELP, INSERT, DELETE, UPDATE, EXIT, ALL, DELETEALL, AVG, MAX, MIN, SIZE, SQL, SORT, COMPARE
+        GET, HELP, INSERT, DELETE, UPDATE, EXIT, ALL, DELETEALL, AVG, MAX, MIN, SIZE, SQL, SORT, COMPARE, COUNT
     }
 
     public enum CATEGORY {
@@ -41,8 +43,9 @@ public class Pokemon_DB {
             else return null;
         }
     }
-
+    public static HashMap<String, Integer> pokemonCountMap = new HashMap<>();
     public static String currTable = "pokemon";
+    public static int total = 0;
 
     private Connection connect() {
         // SQLite connection string
@@ -55,6 +58,7 @@ public class Pokemon_DB {
         }
         return conn;
     }
+
     private static void createNewDatabase(String fileName) {
 
         String url = "jdbc:sqlite:" + fileName;
@@ -417,7 +421,7 @@ public class Pokemon_DB {
         }
     }
 
-    public void deleteall(String tableName) {
+    public void deleteAll(String tableName) {
         String sql = "DELETE FROM " + tableName;
 
         try (Connection conn = this.connect();
@@ -486,7 +490,7 @@ public class Pokemon_DB {
     public void min(String stat, String tableName) {
         String sql = "SELECT * FROM " + tableName + " ORDER BY " + stat + " ASC LIMIT 1";
         System.out.printf("%-8s%-13s%-15s%-10s%-10s%-10s%-10s%-10s%-10s%-13s%-13s%-13s%-13s\n",
-                "ID", "Name", "Item", "HP", "Attack", "Defense", "Sp.Attack", "Sp. Defg", "Speed", "Move 1",
+                "ID", "Name", "Item", "HP", "Attack", "Defense", "Sp.Attack", "Sp. Def", "Speed", "Move 1",
                 "Move 2", "Move 3", "Move 4");
         try (Connection conn = this.connect();
              Statement stmt  = conn.createStatement();
@@ -546,7 +550,7 @@ public class Pokemon_DB {
     public void sort(String stat, String tableName) {
         String sql = "SELECT * FROM " + tableName + " ORDER BY " + stat + " ASC";
         System.out.printf("%-8s%-13s%-15s%-10s%-10s%-10s%-10s%-10s%-10s%-13s%-13s%-13s%-13s\n",
-                "ID", "Name", "Item", "HP", "Attack", "Defense", "Sp.Attack", "Sp. Defg", "Speed", "Move 1",
+                "ID", "Name", "Item", "HP", "Attack", "Defense", "Sp.Attack", "Sp. Def", "Speed", "Move 1",
                 "Move 2", "Move 3", "Move 4");
         try (Connection conn = this.connect();
              Statement stmt  = conn.createStatement();
@@ -577,15 +581,14 @@ public class Pokemon_DB {
         if (stat > avgStat) res = ANSI_GREEN + stat + ANSI_RESET + rightPadding("", 10 - Integer.toString(stat).length());
         else if (stat < avgStat) res = ANSI_RED + stat + ANSI_RESET + rightPadding("", 10 - Integer.toString(stat).length());
         else {
-            //some formatting for later if desired
-            res = Integer.toString(stat);
+            res = ANSI_BLUE + stat + ANSI_RESET + rightPadding("", 10 - Integer.toString(stat).length());
         }
         return res;
     }
 
     public void maxStatIndividualPokemon(String pokemon, String tableName) {
         String sql = "select max(hp) as hp, max(attack) as attack, max(defense) as defense, max(spattack) as spattack," +
-                " max(spdefense) as spdefense, max(speed) as speed from pokemon where name like '" + pokemon + "'";
+                " max(spdefense) as spdefense, max(speed) as speed from " + tableName + " where name like '" + pokemon + "'";
         try (Connection conn = this.connect();
              Statement stmt  = conn.createStatement();
              ResultSet rs    = stmt.executeQuery(sql)){
@@ -605,12 +608,29 @@ public class Pokemon_DB {
         }
     }
 
+    public String formatString(String category, String value) {
+        if (category.equals("hp") || category.equals("attack") || category.equals("defense") ||
+                category.equals("spattack") || category.equals("spdefense") || category.equals("speed")) {
+            return BLACK_BOLD + value + ANSI_RESET + rightPadding("", 10 - value.length());
+        } else if (category.equals("id")) {
+            return BLACK_BOLD + value + ANSI_RESET + rightPadding("", 8 - value.length());
+        } else if (category.equals("name")) {
+            return BLACK_BOLD + value + ANSI_RESET + rightPadding("", 13 - value.length());
+        } else if (category.equals("item")) {
+            return BLACK_BOLD + value + ANSI_RESET + rightPadding("", 15 - value.length());
+        } else {
+            return BLACK_BOLD + value + ANSI_RESET + rightPadding("", 13 - value.length());
+        }
+
+    }
+
     /**
      *
      * @param pokemon (The pokemon this function retrieves to compare agains the passed in stats)
      * @param mode
      * @param tableName
-     * PRINTS OUTS ALL THE ENTRIES OF THE POKEMON PASSED IN
+     * prints out all the entries of the pokemon passed in and compares the stats of each entry the query returns to the averages
+     * of the other pokemon whose stats we also passed in
      */
     public void avgSelectName(String pokemon, double avgHp, double avgAttack, double avgDef,
                               double avgSpattack, double avgSpdef, double avgSpeed, int mode, String tableName) {
@@ -710,9 +730,75 @@ public class Pokemon_DB {
             } catch (SQLException e) {
                 System.out.println(e.getMessage());
             }
+        } else {
+            // compare [id]
+            // get all entries corresponding to the pokemon we want EXCEPT the entry with the id we passed in
+            // we need to translate the mode back to the one we passed in
+            sql = "SELECT * from " + tableName + " where name like '" + pokemon + "' and id != " + (mode-5);
+            String idPokemon = "SELECT * from " + tableName + " where id = " + (mode-5);
+            try (Connection conn = this.connect();
+                 Statement stmt  = conn.createStatement();
+                 ResultSet rs    = stmt.executeQuery(sql);
+                 Statement idQuery = conn.createStatement();
+                 ResultSet rs2 = idQuery.executeQuery(idPokemon)){
+                int hp;
+                int attack;
+                int defense;
+                int spattack;
+                int spdefense;
+                int speed;
 
+                System.out.printf("%-8s%-13s%-15s%-10s%-10s%-10s%-10s%-10s%-10s%-13s%-13s%-13s%-13s\n",
+                        "ID", "Name", "Item", "HP", "Attack", "Defense", "Sp.Attack", "Sp.Def", "Speed", "Move 1",
+                        "Move 2", "Move 3", "Move 4");
+                while (rs.next()) {
+                    hp = rs.getInt("hp");
+                    attack = rs.getInt("attack");
+                    defense = rs.getInt("defense");
+                    spattack = rs.getInt("spattack");
+                    spdefense = rs.getInt("spdefense");
+                    speed = rs.getInt("speed");
+                    String printedHp = setString(hp, avgHp);
+                    String printedAttack = setString(attack, avgAttack);
+                    String printedDefense = setString(defense, avgDef);
+                    String printedSpattack = setString(spattack, avgSpattack);
+                    String printedSpdefense = setString(spdefense, avgSpdef);
+                    String printedSpeed = setString(speed, avgSpeed);
+                    System.out.printf("%-8s%-13s%-15s%-10s%-10s%-10s%-10s%-10s%-10s%-13s%-13s%-13s%-13s\n",
+                            rs.getInt("id"),
+                            rs.getString("name"),
+                            rs.getString("item"),
+                            printedHp,
+                            printedAttack,
+                            printedDefense,
+                            printedSpattack,
+                            printedSpdefense,
+                            printedSpeed,
+                            rs.getString("move1"),
+                            rs.getString("move2"),
+                            rs.getString("move3"),
+                            rs.getString("move4"));
+                }
+                System.out.printf("%-8s%-13s%-15s%-10s%-10s%-10s%-10s%-10s%-10s%-13s%-13s%-13s%-13s\n",
+                        formatString("id", Integer.toString(rs2.getInt("id"))),
+                        formatString("name", rs2.getString("name")),
+                        formatString("item", rs2.getString("item")),
+                        formatString("hp", Integer.toString(rs2.getInt("hp"))),
+                        formatString("attack", Integer.toString(rs2.getInt("attack"))),
+                        formatString("defense", Integer.toString(rs2.getInt("defense"))),
+                        formatString("spattack", Integer.toString(rs2.getInt("spattack"))),
+                        formatString("spdefense", Integer.toString(rs2.getInt("spdefense"))),
+                        formatString("speed", Integer.toString(rs2.getInt("speed"))),
+                        formatString("move1", rs2.getString("move1")),
+                        formatString("move2", rs2.getString("move2")),
+                        formatString("move3", rs2.getString("move3")),
+                        formatString("move4", rs2.getString("move4")));
+            } catch (SQLException e) {
+                System.out.println(e.getMessage());
+            }
 
         }
+
     }
 
     /** Modes:
@@ -731,10 +817,12 @@ public class Pokemon_DB {
             String averages = "select * from (select ROUND(AVG(hp),2) as hp, ROUND(avg(attack),2) as attack, ROUND(avg(defense),2) as defense, " +
                     "ROUND(avg(spattack),2) as spattack, ROUND(avg(spdefense),2) as spdefense, ROUND(avg(speed),2) as speed" +
                     " from (select * from " + tableName + " where name like '" + pokemon1  + "'))";
+            // query returns 1 line containing just the average stats of pokemon1
             try (Connection conn = this.connect();
                  Statement stmt = conn.createStatement();
                  ResultSet rs = stmt.executeQuery(averages)){
                 while (rs.next()) {
+                    //assign the avgs of pokemon 1 to these variables
                     double hp = rs.getDouble("hp");
                     double attack = rs.getDouble("attack");
                     double defense = rs.getDouble("defense");
@@ -745,7 +833,7 @@ public class Pokemon_DB {
                     // CALL THE UPDATED SELECT NAME THAT TAKES IN AVERAGES AND DOES COLORED PRINTING
                     avgSelectName(pokemon1, hp, attack, defense, spattack, spdefense, speed, mode, currTable);
 
-                    // AT TEH VERY END CALL THIS PRINT STATEMENT
+                    // AT THE VERY END CALL THIS PRINT STATEMENT
                     System.out.printf("%36s%-10s%-10s%-10s%-10s%-10s%-10s\n",
                             pokemon1.substring(0, 1).toUpperCase() + pokemon1.substring(1) + " avg: ",
                             hp,
@@ -758,6 +846,47 @@ public class Pokemon_DB {
             } catch (SQLException e) {
                 System.out.println(e.getMessage());
             }
+        } else if (pokemon2.equals("id")) {
+            //compare [id]
+            // we pass in ID for mode
+            // get the 1 line corresponding to the pokemon whose ID we passed in
+            String sql = "select * from pokemon where id = " + mode;
+            String averages = "select * from (select ROUND(AVG(hp),2) as hp, ROUND(avg(attack),2) as attack, ROUND(avg(defense),2) as defense, " +
+                    "ROUND(avg(spattack),2) as spattack, ROUND(avg(spdefense),2) as spdefense, ROUND(avg(speed),2) as speed" +
+                    " from (select * from " + tableName + " where name like '" + pokemon1  + "'))";
+            try (Connection conn = this.connect();
+                 Statement stmt = conn.createStatement();
+                 ResultSet rs = stmt.executeQuery(sql);
+                 Statement averStmt = conn.createStatement();
+                 ResultSet rs2 = averStmt.executeQuery(averages)) {
+                while (rs.next()) {
+                    //assign the stats of the ID pokmeon to these variables
+                    int hp = rs.getInt("hp");
+                    int attack = rs.getInt("attack");
+                    int defense = rs.getInt("defense");
+                    int spattack = rs.getInt("spattack");
+                    int spdefense = rs.getInt("spdefense");
+                    int speed = rs.getInt("speed");
+                    // CALL THE UPDATED SELECT NAME THAT TAKES IN AVERAGES AND DOES COLORED PRINTING
+                    //we increment mode by 5 to make sure it doesn't conflict with modes 0,1,2
+                    avgSelectName(pokemon1, hp, attack, defense, spattack, spdefense, speed, mode+5, currTable);
+
+                    // AT THE VERY END CALL THIS PRINT STATEMENT
+                    System.out.printf("%36s%-10s%-10s%-10s%-10s%-10s%-10s\n",
+                            pokemon1.substring(0, 1).toUpperCase() + pokemon1.substring(1) + " avg: ",
+                            rs2.getDouble("hp"),
+                            rs2.getDouble("attack"),
+                            rs2.getDouble("defense"),
+                            rs2.getDouble("spattack"),
+                            rs2.getDouble("spdefense"),
+                            rs2.getDouble("speed"));
+                    maxStatIndividualPokemon(pokemon1, currTable);
+                }
+            } catch (SQLException e) {
+                System.out.println(e.getMessage());
+            }
+
+
         } else {
             // a valid 2nd arg was passed in
             if (mode == 0) {
@@ -861,28 +990,33 @@ public class Pokemon_DB {
         Scanner scan = new Scanner(System.in);
         System.out.print("Item: ");
         String item = scan.nextLine();
-        System.out.print("HP: ");
-        int hp = Integer.parseInt(scan.nextLine());
-        System.out.print("Attack: ");
-        int attack = Integer.parseInt(scan.nextLine());
-        System.out.print("Defense: ");
-        int defense = Integer.parseInt(scan.nextLine());
-        System.out.print("Special Attack: ");
-        int spAttack = Integer.parseInt(scan.nextLine());
-        System.out.print("Special Defense: ");
-        int spDefense = Integer.parseInt(scan.nextLine());
-        System.out.print("Speed: ");
-        int speed = Integer.parseInt(scan.nextLine());
-        System.out.print("Move 1: ");
-        String move1 = scan.nextLine();
-        System.out.print("Move 2: ");
-        String move2 = scan.nextLine();
-        System.out.print("Move 3: ");
-        String move3 = scan.nextLine();
-        System.out.print("Move 4: ");
-        String move4 = scan.nextLine();
-        db.insert(pokemon_name, item, hp, attack, defense, spAttack, spDefense, speed, move1, move2, move3, move4);
-        System.out.println("SAVED");
+        try {
+            System.out.print("HP: ");
+            int hp = Integer.parseInt(scan.nextLine());
+            System.out.print("Attack: ");
+            int attack = Integer.parseInt(scan.nextLine());
+            System.out.print("Defense: ");
+            int defense = Integer.parseInt(scan.nextLine());
+            System.out.print("Special Attack: ");
+            int spAttack = Integer.parseInt(scan.nextLine());
+            System.out.print("Special Defense: ");
+            int spDefense = Integer.parseInt(scan.nextLine());
+            System.out.print("Speed: ");
+            int speed = Integer.parseInt(scan.nextLine());
+            System.out.print("Move 1: ");
+            String move1 = scan.nextLine();
+            System.out.print("Move 2: ");
+            String move2 = scan.nextLine();
+            System.out.print("Move 3: ");
+            String move3 = scan.nextLine();
+            System.out.print("Move 4: ");
+            String move4 = scan.nextLine();
+            db.insert(pokemon_name, item, hp, attack, defense, spAttack, spDefense, speed, move1, move2, move3, move4);
+            System.out.println("SAVED");
+        } catch (java.lang.NumberFormatException ex) {
+            System.out.println("Inputs for stats must be integers");
+            System.out.println("Insert cancelled");
+        }
     }
 
     public boolean exists(String columnName, String value, String tableName) {
@@ -901,28 +1035,18 @@ public class Pokemon_DB {
 
     }
 
+    /** returns the first word in the input */
     public static COMMAND parseCommand(String input) {
         String[] inputArray = input.split(" ");
-        String com = inputArray[0];
-        if (com.equals("get")) return COMMAND.GET;
-        if (com.equals("help")) return COMMAND.HELP;
-        if (com.equals("insert")) return COMMAND.INSERT;
-        if (com.equals("delete")) return COMMAND.DELETE;
-        if (com.equals("update")) return COMMAND.UPDATE;
-        if (com.equals("exit")) return COMMAND.EXIT;
-        if (com.equals("all")) return COMMAND.ALL;
-        if (com.equals("deleteall")) return COMMAND.DELETEALL;
-        if (com.equals("avg")) return COMMAND.AVG;
-        if (com.equals("max")) return COMMAND.MAX;
-        if (com.equals("min")) return COMMAND.MIN;
-        if (com.equals("size")) return COMMAND.SIZE;
-        if (com.equals("sql")) return COMMAND.SQL;
-        if (com.equals("sort")) return COMMAND.SORT;
-        if (com.equals("compare")) return COMMAND.COMPARE;
-        else return null;
+        String com = inputArray[0].toUpperCase();
+        try {
+            return COMMAND.valueOf(com);
+        } catch (java.lang.IllegalArgumentException ex) {
+            return null;
+        }
     }
 
-    /** returns the second element in input **/
+    /** returns the second word in input **/
     public static CATEGORY parseCategory(String input) {
         String[] inputArray = input.split(" ");
         String com = inputArray[1];
@@ -938,7 +1062,7 @@ public class Pokemon_DB {
         else return null;
     }
 
-    /** returns the rest of the input after the first word **/
+    /** returns the rest of the input after the second word **/
     public static String getArgument(String input) {
         String[] inputArray = input.split(" ");
         if (inputArray.length == 3) {
@@ -960,6 +1084,63 @@ public class Pokemon_DB {
         return res;
     }
 
+    public void backFillHashMap(String tableName) {
+        pokemonCountMap.clear();
+        total = 0;
+        String sql = "SELECT * FROM " + tableName + " ORDER BY name";
+        try (Connection conn = this.connect();
+             Statement stmt  = conn.createStatement();
+             ResultSet rs    = stmt.executeQuery(sql)){
+
+            // loop through the result set
+            while (rs.next()) {
+                String name = rs.getString("name");
+                if (pokemonCountMap.containsKey(name)) {
+                    pokemonCountMap.put(name, pokemonCountMap.get(name)+1);
+                } else {
+                    pokemonCountMap.put(name, 1);
+                }
+            }
+            Map<String, Integer> sortedMap = sortMap(pokemonCountMap, true);
+            printMap(sortedMap, total);
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    private static Map<String, Integer> sortMap(Map<String, Integer> map, boolean order) {
+        List<Entry<String, Integer>> list = new LinkedList<Entry<String, Integer>>(map.entrySet());
+        // Sorting the list based on values
+        Collections.sort(list, new Comparator<Entry<String, Integer>>() {
+            public int compare(Entry<String, Integer> o1,
+                               Entry<String, Integer> o2) {
+                if (order) {
+                    return o1.getValue().compareTo(o2.getValue());
+                } else {
+                    return o2.getValue().compareTo(o1.getValue());
+                }
+            }
+        });
+
+        // Maintaining insertion order with the help of LinkedList
+        Map<String, Integer> sortedMap = new LinkedHashMap<String, Integer>();
+        for (Entry<String, Integer> entry : list) {
+            sortedMap.put(entry.getKey(), entry.getValue());
+        }
+        return sortedMap;
+    }
+
+    public static void printMap(Map<String, Integer> map, int total) {
+        //DecimalFormat numberFormat = new DecimalFormat("#.00");
+        for (Entry<String, Integer> entry : map.entrySet()) {
+            total += entry.getValue();
+            DecimalFormat df = new DecimalFormat("#.##%");
+            System.out.printf("%-11s%-2s%-4s%-2s%-10s\n",
+                    entry.getKey(), "|", entry.getValue(), "|", df.format((double) entry.getValue() / total));
+        }
+        System.out.println("Total: " + total);
+    }
+
     public static void main(String[] args) {
         Pokemon_DB app = new Pokemon_DB();
         app.connect();
@@ -969,6 +1150,7 @@ public class Pokemon_DB {
             String input = scan.nextLine();
             String argument = getArgument(input);
             COMMAND command = parseCommand(input);
+
             String[] inputArray = input.split(" ");
             if (command == null) {
                 System.out.println("Invalid Command. Type in 'help' for a guide.");
@@ -987,6 +1169,9 @@ public class Pokemon_DB {
                 app.sort(stat.toString(), currTable);
 
             }
+            else if (command.equals(COMMAND.COUNT)) {
+                app.backFillHashMap(currTable);
+            }
             else if (command.equals(COMMAND.COMPARE)) {
                 if (inputArray.length < 2) {
                     System.out.println("Wrong number of arguments. The COMPARE command follows the " +
@@ -999,7 +1184,11 @@ public class Pokemon_DB {
                     try {
                         int ID = Integer.parseInt(arg1);
                         // compare one pokemon against averages of all other variations of that pokemon
-                        System.out.println("TBD");
+                        // compare all entries of pokemon with red/green if stat higher/lower than stats of id pokemon
+                        // at the bottom include the id pokemon stat line with red/green for higher lower than avg stats of that pokemon
+                        // at very bottom put max/avg stats of
+                        String pokemon_name = app.selectName(ID, currTable);
+                        app.compare(pokemon_name, "id", ID, currTable);
 
                     } catch (NumberFormatException e) {
                         if (!app.exists("name", arg1, currTable)) {
@@ -1149,7 +1338,7 @@ public class Pokemon_DB {
             }
             else if (command.equals(COMMAND.INSERT)) {
                 if (inputArray.length == 3) {
-                    if ((inputArray[1] + " " + inputArray[2]).equals("Mr. Mime")) {
+                    if ((inputArray[1] + " " + inputArray[2]).equals("mr. Mime")) {
                         insertToTable(app, "Mr. Mime");
                     } else {
                         System.out.println("Wrong number of arguments. The INSERT command follows the form: insert [pokemon]");
@@ -1160,7 +1349,8 @@ public class Pokemon_DB {
                     System.out.println("Wrong number of arguments. The INSERT command follows the form: insert [pokemon]");
                     continue;
                 }
-                insertToTable(app, inputArray[1]);
+                String pokemonName = inputArray[1].substring(0, 1).toUpperCase() + inputArray[1].substring(1);
+                insertToTable(app, pokemonName);
             }
             else if (command.equals(COMMAND.DELETE)) {
                 // valid arguments check
@@ -1307,7 +1497,7 @@ public class Pokemon_DB {
                 System.out.print("DELETEALL>");
                 String answer = scan.nextLine();
                 if (answer.equals("y")) {
-                    app.deleteall(currTable);
+                    app.deleteAll(currTable);
                     System.out.println("All entries in pokemon table deleted");
                 } else if (answer.equals("n")) {
                     System.out.println("Cancelled");
