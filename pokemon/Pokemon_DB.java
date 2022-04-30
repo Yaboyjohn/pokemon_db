@@ -10,42 +10,12 @@ import java.util.Map.Entry;
 public class Pokemon_DB {
     DatabaseUtils databaseUtils = new DatabaseUtils();
 
-    public static final String ANSI_RESET = "\u001B[0m";
-    public static final String ANSI_BLACK = "\u001B[30m";
-    public static final String ANSI_RED = "\u001B[31m";
-    public static final String ANSI_GREEN = "\u001B[32m";
-    public static final String ANSI_YELLOW = "\u001B[33m";
-    public static final String ANSI_BLUE = "\u001B[34m";
-    public static final String ANSI_PURPLE = "\u001B[35m";
-    public static final String ANSI_CYAN = "\u001B[36m";
-    public static final String ANSI_WHITE = "\u001B[37m";
-    //USAGE: System.out.println(ANSI_RED + "This text is red!" + ANSI_RESET);
-    public static final String GREEN = "\033[0;32m";   // GREEN
-    public static final String RESET = "\033[0m";  // Text Reset
-    public static final String ANSI_BLACK_BACKGROUND = "\u001B[40m";
-    public static final String ANSI_RED_BACKGROUND = "\u001B[41m";
-    public static final String ANSI_GREEN_BACKGROUND = "\u001B[42m";
-    public static final String ANSI_YELLOW_BACKGROUND = "\u001B[43m";
-    public static final String ANSI_BLUE_BACKGROUND = "\u001B[44m";
-    public static final String ANSI_PURPLE_BACKGROUND = "\u001B[45m";
-    public static final String ANSI_CYAN_BACKGROUND = "\u001B[46m";
-    public static final String ANSI_WHITE_BACKGROUND = "\u001B[47m";
-    public static final String BLACK_BOLD = "\033[1;30m";
-
-
     // Both these variables are used for the COUNT command
     public static int total = 0;
     public static HashMap<String, Integer> pokemonCountMap = new HashMap<>();
 
     // Contains the name of the main database table we are working with
     public static String currTable = "pokemon";
-
-
-    public static String rightPadding(String str, int num) {
-        return String.format("%1$-" + num + "s", str);
-    }
-
-
 
     public void insert(String name, String item, int hp, int attack, int defense,
                        int spattack, int spdefense, int speed, String move1, String move2,
@@ -264,15 +234,7 @@ public class Pokemon_DB {
         }
     }
 
-    public String setString(int stat, double avgStat) {
-        String res;
-        if (stat > avgStat) res = ANSI_GREEN + stat + ANSI_RESET + rightPadding("", 10 - Integer.toString(stat).length());
-        else if (stat < avgStat) res = ANSI_RED + stat + ANSI_RESET + rightPadding("", 10 - Integer.toString(stat).length());
-        else {
-            res = ANSI_BLUE + stat + ANSI_RESET + rightPadding("", 10 - Integer.toString(stat).length());
-        }
-        return res;
-    }
+
 
     public void maxStatIndividualPokemon(String pokemon, String tableName) {
         String sql = "select max(hp) as hp, max(attack) as attack, max(defense) as defense, max(spattack) as spattack," +
@@ -296,32 +258,17 @@ public class Pokemon_DB {
         }
     }
 
-    public String formatString(String category, String value) {
-        if (category.equals("hp") || category.equals("attack") || category.equals("defense") ||
-                category.equals("spattack") || category.equals("spdefense") || category.equals("speed")) {
-            return BLACK_BOLD + value + ANSI_RESET + rightPadding("", 10 - value.length());
-        } else if (category.equals("id")) {
-            return BLACK_BOLD + value + ANSI_RESET + rightPadding("", 8 - value.length());
-        } else if (category.equals("name")) {
-            return BLACK_BOLD + value + ANSI_RESET + rightPadding("", 13 - value.length());
-        } else if (category.equals("item")) {
-            return BLACK_BOLD + value + ANSI_RESET + rightPadding("", 15 - value.length());
-        } else {
-            return BLACK_BOLD + value + ANSI_RESET + rightPadding("", 13 - value.length());
-        }
-
-    }
-
     /**
      *
-     * @param pokemon (The pokemon this function retrieves to compare agains the passed in stats)
-     * @param mode
+     * @param pokemon (The pokemon this function retrieves to compare against the passed in stats)
+     * @param mode (0 = compare [pokemon1] all, 1 = compare all [pokemon1], 2 = compare [pokemon1] [pokemon2])
      * @param tableName
      * prints out all the entries of the pokemon passed in and compares the stats of each entry the query returns to the averages
      * of the other pokemon whose stats we also passed in
      */
     public void avgSelectName(String pokemon, double avgHp, double avgAttack, double avgDef,
                               double avgSpattack, double avgSpdef, double avgSpeed, int mode, String tableName) {
+        FormatUtils formatUtils = new FormatUtils();
         String sql = null;
         if (mode == 0 || mode  == 2 || mode == -1) {
             //compare [pokemon1] all (mode 0) OR compare [pokemon1] [pokemon2] (mode 2)
@@ -346,12 +293,12 @@ public class Pokemon_DB {
                     spattack = rs.getInt("spattack");
                     spdefense = rs.getInt("spdefense");
                     speed = rs.getInt("speed");
-                    String printedHp = setString(hp, avgHp);
-                    String printedAttack = setString(attack, avgAttack);
-                    String printedDefense = setString(defense, avgDef);
-                    String printedSpattack = setString(spattack, avgSpattack);
-                    String printedSpdefense = setString(spdefense, avgSpdef);
-                    String printedSpeed = setString(speed, avgSpeed);
+                    String printedHp = formatUtils.setStatComparisonColors(hp, avgHp);
+                    String printedAttack = formatUtils.setStatComparisonColors(attack, avgAttack);
+                    String printedDefense = formatUtils.setStatComparisonColors(defense, avgDef);
+                    String printedSpattack = formatUtils.setStatComparisonColors(spattack, avgSpattack);
+                    String printedSpdefense = formatUtils.setStatComparisonColors(spdefense, avgSpdef);
+                    String printedSpeed = formatUtils.setStatComparisonColors(speed, avgSpeed);
                     System.out.printf("%-8s%-13s%-15s%-10s%-10s%-10s%-10s%-10s%-10s%-13s%-13s%-13s%-13s\n",
                             rs.getInt("id"),
                             rs.getString("name"),
@@ -394,12 +341,12 @@ public class Pokemon_DB {
                     spattack = rs.getInt("spattack");
                     spdefense = rs.getInt("spdefense");
                     speed = rs.getInt("speed");
-                    String printedHp = setString(hp, avgHp);
-                    String printedAttack = setString(attack, avgAttack);
-                    String printedDefense = setString(defense, avgDef);
-                    String printedSpattack = setString(spattack, avgSpattack);
-                    String printedSpdefense = setString(spdefense, avgSpdef);
-                    String printedSpeed = setString(speed, avgSpeed);
+                    String printedHp = formatUtils.setStatComparisonColors(hp, avgHp);
+                    String printedAttack = formatUtils.setStatComparisonColors(attack, avgAttack);
+                    String printedDefense = formatUtils.setStatComparisonColors(defense, avgDef);
+                    String printedSpattack = formatUtils.setStatComparisonColors(spattack, avgSpattack);
+                    String printedSpdefense = formatUtils.setStatComparisonColors(spdefense, avgSpdef);
+                    String printedSpeed = formatUtils.setStatComparisonColors(speed, avgSpeed);
                     System.out.printf("%-8s%-13s%-15s%-10s%-10s%-10s%-10s%-10s%-10s%-13s%-13s%-13s%-13s\n",
                             rs.getInt("id"),
                             rs.getString("name"),
@@ -446,12 +393,12 @@ public class Pokemon_DB {
                     spattack = rs.getInt("spattack");
                     spdefense = rs.getInt("spdefense");
                     speed = rs.getInt("speed");
-                    String printedHp = setString(hp, avgHp);
-                    String printedAttack = setString(attack, avgAttack);
-                    String printedDefense = setString(defense, avgDef);
-                    String printedSpattack = setString(spattack, avgSpattack);
-                    String printedSpdefense = setString(spdefense, avgSpdef);
-                    String printedSpeed = setString(speed, avgSpeed);
+                    String printedHp = formatUtils.setStatComparisonColors(hp, avgHp);
+                    String printedAttack = formatUtils.setStatComparisonColors(attack, avgAttack);
+                    String printedDefense = formatUtils.setStatComparisonColors(defense, avgDef);
+                    String printedSpattack = formatUtils.setStatComparisonColors(spattack, avgSpattack);
+                    String printedSpdefense = formatUtils.setStatComparisonColors(spdefense, avgSpdef);
+                    String printedSpeed = formatUtils.setStatComparisonColors(speed, avgSpeed);
                     System.out.printf("%-8s%-13s%-15s%-10s%-10s%-10s%-10s%-10s%-10s%-13s%-13s%-13s%-13s\n",
                             rs.getInt("id"),
                             rs.getString("name"),
@@ -468,25 +415,23 @@ public class Pokemon_DB {
                             rs.getString("move4"));
                 }
                 System.out.printf("%-8s%-13s%-15s%-10s%-10s%-10s%-10s%-10s%-10s%-13s%-13s%-13s%-13s\n",
-                        formatString("id", Integer.toString(rs2.getInt("id"))),
-                        formatString("name", rs2.getString("name")),
-                        formatString("item", rs2.getString("item")),
-                        formatString("hp", Integer.toString(rs2.getInt("hp"))),
-                        formatString("attack", Integer.toString(rs2.getInt("attack"))),
-                        formatString("defense", Integer.toString(rs2.getInt("defense"))),
-                        formatString("spattack", Integer.toString(rs2.getInt("spattack"))),
-                        formatString("spdefense", Integer.toString(rs2.getInt("spdefense"))),
-                        formatString("speed", Integer.toString(rs2.getInt("speed"))),
-                        formatString("move1", rs2.getString("move1")),
-                        formatString("move2", rs2.getString("move2")),
-                        formatString("move3", rs2.getString("move3")),
-                        formatString("move4", rs2.getString("move4")));
+                        formatUtils.setBoldForBaselinePokemon("id", Integer.toString(rs2.getInt("id"))),
+                        formatUtils.setBoldForBaselinePokemon("name", rs2.getString("name")),
+                        formatUtils.setBoldForBaselinePokemon("item", rs2.getString("item")),
+                        formatUtils.setBoldForBaselinePokemon("hp", Integer.toString(rs2.getInt("hp"))),
+                        formatUtils.setBoldForBaselinePokemon("attack", Integer.toString(rs2.getInt("attack"))),
+                        formatUtils.setBoldForBaselinePokemon("defense", Integer.toString(rs2.getInt("defense"))),
+                        formatUtils.setBoldForBaselinePokemon("spattack", Integer.toString(rs2.getInt("spattack"))),
+                        formatUtils.setBoldForBaselinePokemon("spdefense", Integer.toString(rs2.getInt("spdefense"))),
+                        formatUtils.setBoldForBaselinePokemon("speed", Integer.toString(rs2.getInt("speed"))),
+                        formatUtils.setBoldForBaselinePokemon("move1", rs2.getString("move1")),
+                        formatUtils.setBoldForBaselinePokemon("move2", rs2.getString("move2")),
+                        formatUtils.setBoldForBaselinePokemon("move3", rs2.getString("move3")),
+                        formatUtils.setBoldForBaselinePokemon("move4", rs2.getString("move4")));
             } catch (SQLException e) {
                 System.out.println(e.getMessage());
             }
-
         }
-
     }
 
     /** Modes:
