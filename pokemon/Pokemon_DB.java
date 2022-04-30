@@ -1,6 +1,6 @@
 package pokemon;
 
-import pokemon.commands.SelectCommand;
+import pokemon.commands.GetCommand;
 
 import java.sql.*;
 import java.text.DecimalFormat;
@@ -33,9 +33,13 @@ public class Pokemon_DB {
     public static final String BLACK_BOLD = "\033[1;30m";
 
 
-    public static HashMap<String, Integer> pokemonCountMap = new HashMap<>();
-    public static String currTable = "pokemon";
+    // Both these variables are used for the COUNT command
     public static int total = 0;
+    public static HashMap<String, Integer> pokemonCountMap = new HashMap<>();
+
+    // Contains the name of the main database table we are working with
+    public static String currTable = "pokemon";
+
 
     public static String rightPadding(String str, int num) {
         return String.format("%1$-" + num + "s", str);
@@ -829,7 +833,7 @@ public class Pokemon_DB {
 
     public static void main(String[] args) {
         Pokemon_DB app = new Pokemon_DB();
-        SelectCommand selectCommand = new SelectCommand();
+        GetCommand selectCommand = new GetCommand();
         app.databaseUtils.connect();
         Scanner scan = new Scanner(System.in);
         while (true) {
@@ -874,7 +878,7 @@ public class Pokemon_DB {
                         // compare all entries of pokemon with red/green if stat higher/lower than stats of id pokemon
                         // at the bottom include the id pokemon stat line with red/green for higher lower than avg stats of that pokemon
                         // at very bottom put max/avg stats of
-                        String pokemon_name = selectCommand.selectName(ID, currTable);
+                        String pokemon_name = selectCommand.selectNameById(ID, currTable);
                         app.compare(pokemon_name, "id", ID, currTable);
 
                     } catch (NumberFormatException e) {
@@ -1011,6 +1015,7 @@ public class Pokemon_DB {
                         String stat = inputArray[1];
                         String operator = parseStat(input)[0];
                         int num = Integer.parseInt(parseStat(input)[1]);
+                        // @TODO add validity check on operator. Currently "get attack * 100" and "get attack & 100" both work. Restrict operator to <,>,=
                         int count = selectCommand.selectStat(stat, operator, num, currTable);
                         if (count == 0) {
                             System.out.println("No pokemon satisfied the provided criteria.");
@@ -1088,7 +1093,7 @@ public class Pokemon_DB {
                         int id = Integer.parseInt(inputArray[1]);
                         if (!app.exists("ID", inputArray[1], currTable)) System.out.println("This ID is not in the database");
                         else {
-                            selectCommand.selectID(id, currTable);
+                            selectCommand.selectPokemonByID(id, currTable);
                             int ID = Integer.parseInt(inputArray[1]);
                             System.out.println("Please enter which categories you wish to update");
                             System.out.print("UPDATE>");
@@ -1132,7 +1137,7 @@ public class Pokemon_DB {
                                         System.out.println("This ID does not correspond to any pokemon in the database. Cancelling update.");
                                         continue;
                                     }
-                                    String requested_pokemon = selectCommand.selectName(ID, currTable).toLowerCase();
+                                    String requested_pokemon = selectCommand.selectNameById(ID, currTable).toLowerCase();
                                     System.out.println("name: " + pokemon_name + " req: " + requested_pokemon);
                                     if (!requested_pokemon.equals(pokemon_name)) {
                                         System.out.println("The ID you entered does not match any IDs of the pokemon you want to update. Cancelling update");
