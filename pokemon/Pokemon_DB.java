@@ -1,5 +1,7 @@
 package pokemon;
 
+import pokemon.commands.SelectCommand;
+
 import java.sql.*;
 import java.text.DecimalFormat;
 import java.util.*;
@@ -7,7 +9,7 @@ import java.util.Map.Entry;
 
 public class Pokemon_DB {
     DatabaseUtils databaseUtils = new DatabaseUtils();
-    Enums enums = new Enums();
+
     public static final String ANSI_RESET = "\u001B[0m";
     public static final String ANSI_BLACK = "\u001B[30m";
     public static final String ANSI_RED = "\u001B[31m";
@@ -39,243 +41,7 @@ public class Pokemon_DB {
         return String.format("%1$-" + num + "s", str);
     }
 
-    public void selectAll(String tableName, boolean orderById){
-        String emptyCheck = "SELECT count(*) FROM " + tableName;
-        String sql;
-        if (orderById) {
-            sql = "SELECT * FROM " + tableName + " ORDER BY id";
-        } else {
-            sql = "SELECT * FROM " + tableName + " ORDER BY name";
-        }
-        try (Connection conn = databaseUtils.connect();
-             Statement stmt  = conn.createStatement();
-             Statement stmt2 = conn.createStatement();
-             ResultSet check = stmt2.executeQuery(emptyCheck);
-             ResultSet rs    = stmt.executeQuery(sql)){
 
-            if (!check.next()) {
-                System.out.println(tableName + " table has no entries");
-                return;
-            }
-            System.out.printf("%-8s%-13s%-15s%-10s%-10s%-10s%-10s%-10s%-10s%-13s%-13s%-13s%-13s\n",
-                    "ID", "Name", "Item", "HP", "Attack", "Defense", "Sp.Attack", "Sp.Def", "Speed", "Move 1",
-                    "Move 2", "Move 3", "Move 4");
-            // loop through the result set
-            while (rs.next()) {
-                System.out.printf("%-8s%-13s%-15s%-10s%-10s%-10s%-10s%-10s%-10s%-13s%-13s%-13s%-13s\n",
-                        rs.getInt("id"),
-                        rs.getString("name"),
-                        rs.getString("item"),
-                        rs.getInt("hp"),
-                        rs.getInt("attack"),
-                        rs.getInt("defense"),
-                        rs.getInt("spattack"),
-                        rs.getInt("spdefense"),
-                        rs.getInt("speed"),
-                        rs.getString("move1"),
-                        rs.getString("move2"),
-                        rs.getString("move3"),
-                        rs.getString("move4"));
-            }
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
-    }
-
-    public int selectID(int ID, String tableName) {
-        String sql = "SELECT * FROM " + tableName + " WHERE id = " + ID + " ORDER BY ID";
-        int count = 0;
-        try (Connection conn = databaseUtils.connect();
-             Statement stmt  = conn.createStatement();
-             ResultSet rs    = stmt.executeQuery(sql)){
-            while (rs.next()) {
-                count++;
-                System.out.println(rs.getInt("id") +  "\t" +
-                        rs.getString("name") + "\t" +
-                        rs.getString("item") + "\t" +
-                        rs.getInt("hp") + "\t" +
-                        rs.getInt("attack") + "\t" +
-                        rs.getInt("defense") + "\t" +
-                        rs.getInt("spattack") + "\t" +
-                        rs.getInt("spdefense") + "\t" +
-                        rs.getInt("speed") + "\t" +
-                        rs.getString("move1") + "        " +
-                        rs.getString("move2") + "        " +
-                        rs.getString("move3") + "        " +
-                        rs.getString("move4") + "\t");
-            }
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
-        return count;
-    }
-
-    public String selectName(int pokemon_id, String tableName) {
-        String sql = "SELECT name FROM " + tableName + " WHERE id = " + pokemon_id;
-        String res = null;
-        try (Connection conn = databaseUtils.connect();
-             Statement stmt  = conn.createStatement();
-             ResultSet rs    = stmt.executeQuery(sql)){
-             res = rs.getString("name");
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
-        return res;
-    }
-
-
-    public int selectName(String pokemon_name, boolean ordered, String tableName) {
-        String sql = null;
-        if (ordered) sql = "SELECT * FROM " + tableName + " WHERE name LIKE " + "'" + pokemon_name + "'" + " ORDER BY item";
-        else sql =  "SELECT * FROM " + tableName + " WHERE name LIKE " + "'" + pokemon_name + "'";
-        int count = 0;
-        try (Connection conn = databaseUtils.connect();
-             Statement stmt  = conn.createStatement();
-             ResultSet rs    = stmt.executeQuery(sql)){
-
-            System.out.printf("%-8s%-13s%-15s%-10s%-10s%-10s%-10s%-10s%-10s%-13s%-13s%-13s%-13s\n",
-                    "ID", "Name", "Item", "HP", "Attack", "Defense", "Sp.Attack", "Sp.Def", "Speed", "Move 1",
-                    "Move 2", "Move 3", "Move 4");
-            while (rs.next()) {
-                count++;
-                System.out.printf("%-8s%-13s%-15s%-10s%-10s%-10s%-10s%-10s%-10s%-13s%-13s%-13s%-13s\n",
-                        rs.getInt("id"),
-                        rs.getString("name"),
-                        rs.getString("item"),
-                        rs.getInt("hp"),
-                        rs.getInt("attack"),
-                        rs.getInt("defense"),
-                        rs.getInt("spattack"),
-                        rs.getInt("spdefense"),
-                        rs.getInt("speed"),
-                        rs.getString("move1"),
-                        rs.getString("move2"),
-                        rs.getString("move3"),
-                        rs.getString("move4"));
-            }
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
-        return count;
-    }
-
-    public int selectItem(String item, String tableName) {
-        String sql = "SELECT * FROM " + tableName + " WHERE item LIKE " + "'" + item + "' ORDER BY name";
-        int count = 0;
-        try (Connection conn = databaseUtils.connect();
-             Statement stmt  = conn.createStatement();
-             ResultSet rs    = stmt.executeQuery(sql)) {
-            System.out.printf("%-8s%-13s%-15s%-10s%-10s%-10s%-10s%-10s%-10s%-13s%-13s%-13s%-13s\n",
-                    "ID", "Name", "Item", "HP", "Attack", "Defense", "Sp.Attack", "Sp.Def", "Speed", "Move 1",
-                    "Move 2", "Move 3", "Move 4");
-            while (rs.next()) {
-                count++;
-                System.out.printf("%-8s%-13s%-15s%-10s%-10s%-10s%-10s%-10s%-10s%-13s%-13s%-13s%-13s\n",
-                        rs.getInt("id"),
-                        rs.getString("name"),
-                        rs.getString("item"),
-                        rs.getInt("hp"),
-                        rs.getInt("attack"),
-                        rs.getInt("defense"),
-                        rs.getInt("spattack"),
-                        rs.getInt("spdefense"),
-                        rs.getInt("speed"),
-                        rs.getString("move1"),
-                        rs.getString("move2"),
-                        rs.getString("move3"),
-                        rs.getString("move4"));
-            }
-            //ANSI CODE
-//            System.out.printf("%-8s%-13s" + BLACK_BOLD + "Item" + ANSI_RESET + rightPadding("", 15 - "item".length()) + "%-10s%-10s%-10s%-10s%-10s%-10s%-13s%-13s%-13s%-13s\n",
-//                    "ID", "Name", "HP", "Attack", "Defense", "Sp.Attack", "Sp.Def", "Speed", "Move 1",
-//                    "Move 2", "Move 3", "Move 4");
-//            while (rs.next()) {
-//                count++;
-//                System.out.printf("%-8s%-13s"  + ANSI_GREEN + rs.getString("item") + ANSI_RESET + rightPadding("", 15 - rs.getString("item").length()) + "%-10s%-10s%-10s%-10s%-10s%-10s%-13s%-13s%-13s%-13s\n",
-//                        rs.getInt("id"),
-//                        rs.getString("name"),
-//                        rs.getInt("hp"),
-//                        rs.getInt("attack"),
-//                        rs.getInt("defense"),
-//                        rs.getInt("spattack"),
-//                        rs.getInt("spdefense"),
-//                        rs.getInt("speed"),
-//                        rs.getString("move1"),
-//                        rs.getString("move2"),
-//                        rs.getString("move3"),
-//                        rs.getString("move4"));
-//            }
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
-        return count;
-    }
-
-    public int selectMove(String move, String tableName) {
-        String sql = "SELECT * FROM " + tableName + " WHERE move1 LIKE " + "'" + move + "' OR " +
-                "move2 LIKE " + "'" + move + "' OR " +  "move3 LIKE " + "'" + move + "' OR "
-                +  "move4 LIKE " + "'" + move + "' ORDER BY name";
-        int count = 0;
-        try (Connection conn = databaseUtils.connect();
-             Statement stmt  = conn.createStatement();
-             ResultSet rs    = stmt.executeQuery(sql)){
-            System.out.printf("%-8s%-13s%-15s%-10s%-10s%-10s%-10s%-10s%-10s%-13s%-13s%-13s%-13s\n",
-                    "ID", "Name", "Item", "HP", "Attack", "Defense", "Sp.Attack", "Sp.Def", "Speed", "Move 1",
-                    "Move 2", "Move 3", "Move 4");
-            while (rs.next()) {
-                count++;
-                System.out.printf("%-8s%-13s%-15s%-10s%-10s%-10s%-10s%-10s%-10s%-13s%-13s%-13s%-13s\n",
-                        rs.getInt("id"),
-                        rs.getString("name"),
-                        rs.getString("item"),
-                        rs.getInt("hp"),
-                        rs.getInt("attack"),
-                        rs.getInt("defense"),
-                        rs.getInt("spattack"),
-                        rs.getInt("spdefense"),
-                        rs.getInt("speed"),
-                        rs.getString("move1"),
-                        rs.getString("move2"),
-                        rs.getString("move3"),
-                        rs.getString("move4"));
-            }
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
-        return count;
-    }
-
-    public int selectStat(String stat, String operator, int num, String tableName) {
-        String sql = "SELECT * FROM " + tableName + " WHERE " + stat + " " + operator + " " + num + " ORDER BY " + stat + " DESC";
-        int count = 0;
-        try (Connection conn = databaseUtils.connect();
-             Statement stmt  = conn.createStatement();
-             ResultSet rs    = stmt.executeQuery(sql)){
-            System.out.printf("%-8s%-13s%-15s%-10s%-10s%-10s%-10s%-10s%-10s%-13s%-13s%-13s%-13s\n",
-                    "ID", "Name", "Item", "HP", "Attack", "Defense", "Sp.Attack", "Sp.Def", "Speed", "Move 1",
-                    "Move 2", "Move 3", "Move 4");
-            while (rs.next()) {
-                count++;
-                System.out.printf("%-8s%-13s%-15s%-10s%-10s%-10s%-10s%-10s%-10s%-13s%-13s%-13s%-13s\n",
-                        rs.getInt("id"),
-                        rs.getString("name"),
-                        rs.getString("item"),
-                        rs.getInt("hp"),
-                        rs.getInt("attack"),
-                        rs.getInt("defense"),
-                        rs.getInt("spattack"),
-                        rs.getInt("spdefense"),
-                        rs.getInt("speed"),
-                        rs.getString("move1"),
-                        rs.getString("move2"),
-                        rs.getString("move3"),
-                        rs.getString("move4"));
-            }
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
-        return count;
-    }
 
     public void insert(String name, String item, int hp, int attack, int defense,
                        int spattack, int spdefense, int speed, String move1, String move2,
@@ -1063,6 +829,7 @@ public class Pokemon_DB {
 
     public static void main(String[] args) {
         Pokemon_DB app = new Pokemon_DB();
+        SelectCommand selectCommand = new SelectCommand();
         app.databaseUtils.connect();
         Scanner scan = new Scanner(System.in);
         while (true) {
@@ -1107,7 +874,7 @@ public class Pokemon_DB {
                         // compare all entries of pokemon with red/green if stat higher/lower than stats of id pokemon
                         // at the bottom include the id pokemon stat line with red/green for higher lower than avg stats of that pokemon
                         // at very bottom put max/avg stats of
-                        String pokemon_name = app.selectName(ID, currTable);
+                        String pokemon_name = selectCommand.selectName(ID, currTable);
                         app.compare(pokemon_name, "id", ID, currTable);
 
                     } catch (NumberFormatException e) {
@@ -1196,7 +963,7 @@ public class Pokemon_DB {
                         System.out.println("This pokemon is not in the database");
                         continue;
                     }
-                    app.selectName("Mr. Mime", true, currTable);
+                    selectCommand.selectName("Mr. Mime", true, currTable);
                 }
                 // This is getting a single pokemon ex. get suicune
                 else if (inputArray.length == 2) {
@@ -1204,7 +971,7 @@ public class Pokemon_DB {
                         System.out.println("This pokemon is not in the database");
                         continue;
                     }
-                    app.selectName(inputArray[1], true, currTable);
+                    selectCommand.selectName(inputArray[1], true, currTable);
                 }
                 // This can be anything other than name ex. get item lum berry
                 else {
@@ -1223,7 +990,7 @@ public class Pokemon_DB {
                             System.out.println("This item is not in the database");
                             continue;
                         }
-                        app.selectItem(argument.replaceAll("'", "''"), currTable);
+                        selectCommand.selectItem(argument.replaceAll("'", "''"), currTable);
                     }
                     else if (category.equals(Enums.CATEGORY.MOVE)) {
                         if (inputArray.length > 4 && !input.equals("get move hi jump kick")) {
@@ -1236,7 +1003,7 @@ public class Pokemon_DB {
                             System.out.println("This move is not in the database");
                             continue;
                         }
-                        app.selectMove(argument, currTable);
+                        selectCommand.selectMove(argument, currTable);
                     }
                     // ex. get hp > 300, get hp = 300, get hp >= 300
                     else if (category.equals(Enums.CATEGORY.HP) || category.equals(Enums.CATEGORY.ATTACK)|| category.equals(Enums.CATEGORY.DEFENSE) ||
@@ -1244,7 +1011,7 @@ public class Pokemon_DB {
                         String stat = inputArray[1];
                         String operator = parseStat(input)[0];
                         int num = Integer.parseInt(parseStat(input)[1]);
-                        int count = app.selectStat(stat, operator, num, currTable);
+                        int count = selectCommand.selectStat(stat, operator, num, currTable);
                         if (count == 0) {
                             System.out.println("No pokemon satisfied the provided criteria.");
                         }
@@ -1291,7 +1058,7 @@ public class Pokemon_DB {
                     // ex.delete milotic
                     if (!app.exists("name", inputArray[1], currTable)) System.out.println("This pokemon is not in the database");
                     else {
-                        app.selectName(inputArray[1], false, currTable);
+                        selectCommand.selectName(inputArray[1], false, currTable);
                         System.out.println("Please enter the ID of the pokemon you want to update");
                         System.out.print("DELETE>");
                         String usr_input = scan.nextLine();
@@ -1321,7 +1088,7 @@ public class Pokemon_DB {
                         int id = Integer.parseInt(inputArray[1]);
                         if (!app.exists("ID", inputArray[1], currTable)) System.out.println("This ID is not in the database");
                         else {
-                            app.selectID(id, currTable);
+                            selectCommand.selectID(id, currTable);
                             int ID = Integer.parseInt(inputArray[1]);
                             System.out.println("Please enter which categories you wish to update");
                             System.out.print("UPDATE>");
@@ -1352,7 +1119,7 @@ public class Pokemon_DB {
                         String pokemon_name = inputArray[1];
                         if (!app.exists("name", pokemon_name, currTable)) System.out.println("This pokemon is not in the database");
                         else {
-                            app.selectName(pokemon_name, false, currTable);
+                            selectCommand.selectName(pokemon_name, false, currTable);
                             System.out.println("Please enter the ID of the pokemon you want to update");
                             System.out.print("UPDATE>");
                             String usr_input = scan.nextLine();
@@ -1365,7 +1132,7 @@ public class Pokemon_DB {
                                         System.out.println("This ID does not correspond to any pokemon in the database. Cancelling update.");
                                         continue;
                                     }
-                                    String requested_pokemon = app.selectName(ID, currTable).toLowerCase();
+                                    String requested_pokemon = selectCommand.selectName(ID, currTable).toLowerCase();
                                     System.out.println("name: " + pokemon_name + " req: " + requested_pokemon);
                                     if (!requested_pokemon.equals(pokemon_name)) {
                                         System.out.println("The ID you entered does not match any IDs of the pokemon you want to update. Cancelling update");
@@ -1404,9 +1171,9 @@ public class Pokemon_DB {
             }
             else if (command.equals(Enums.COMMAND.ALL)) {
                 if (inputArray.length == 1) {
-                    app.selectAll(currTable, false);
+                    selectCommand.selectAll(currTable, false);
                 } else if (inputArray.length == 2 && inputArray[1].equals("id")) {
-                    app.selectAll(currTable, true);
+                    selectCommand.selectAll(currTable, true);
                 } else {
                     System.out.println("Invalid Command");
                 }
