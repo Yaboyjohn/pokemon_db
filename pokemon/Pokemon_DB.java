@@ -7,6 +7,10 @@ import java.text.DecimalFormat;
 import java.util.*;
 import java.util.Map.Entry;
 
+import static pokemon.ParseUtils.getArgument;
+import static pokemon.ParseUtils.parseCategory;
+import static pokemon.ParseUtils.parseCommand;
+
 public class Pokemon_DB {
     DatabaseUtils databaseUtils = new DatabaseUtils();
 
@@ -233,7 +237,6 @@ public class Pokemon_DB {
             System.out.println(e.getMessage());
         }
     }
-
 
 
     public void maxStatIndividualPokemon(String pokemon, String tableName) {
@@ -668,46 +671,6 @@ public class Pokemon_DB {
 
     }
 
-    /** returns the first word in the input */
-    public static Enums.COMMAND parseCommand(String input) {
-        String[] inputArray = input.split(" ");
-        String com = inputArray[0].toUpperCase();
-        try {
-            return Enums.COMMAND.valueOf(com);
-        } catch (java.lang.IllegalArgumentException ex) {
-            return null;
-        }
-    }
-
-    /** returns the second word in input **/
-    public static Enums.CATEGORY parseCategory(String input) {
-        String[] inputArray = input.split(" ");
-        String com = inputArray[1];
-        if (com.equals("item")) return Enums.CATEGORY.ITEM;
-        if (com.equals("hp")) return Enums.CATEGORY.HP;
-        if (com.equals("attack")) return Enums.CATEGORY.ATTACK;
-        if (com.equals("defense")) return Enums.CATEGORY.DEFENSE;
-        if (com.equals("spattack")) return Enums.CATEGORY.SPATTACK;
-        if (com.equals("spdefense")) return Enums.CATEGORY.SPDEFENSE;
-        if (com.equals("speed")) return Enums.CATEGORY.SPEED;
-        if (com.equals("move")) return Enums.CATEGORY.MOVE;
-        if (com.equals("id")) return Enums.CATEGORY.ID;
-        else return null;
-    }
-
-    /** returns the rest of the input after the second word **/
-    public static String getArgument(String input) {
-        String[] inputArray = input.split(" ");
-        if (inputArray.length == 3) {
-            return inputArray[2];
-        } else if (inputArray.length == 4) {
-            return inputArray[2] + " " + inputArray[3];
-        } else if (inputArray.length == 5) {
-            return inputArray[2] + " " + inputArray[3] + " " + inputArray[4];
-        }
-        return null;
-    }
-
     /** returns a String[] where the first elem is the stat and the second is the value of the stat **/
     public static String[] parseStat(String input) {
         String[] res = new String[2];
@@ -784,19 +747,19 @@ public class Pokemon_DB {
         while (true) {
             System.out.print("MAIN>");
             String input = scan.nextLine();
-            String argument = getArgument(input);
-            Enums.COMMAND command = parseCommand(input);
-
             String[] inputArray = input.split(" ");
+            String argument = getArgument(inputArray);
+            Enums.COMMAND command = parseCommand(inputArray);
+
             if (command == null) {
-                System.out.println("Invalid Command. Type in 'help' for a guide. swag");
+                System.out.println("Invalid Command. Type in 'help' for a guide.");
             }
             else if (command.equals(Enums.COMMAND.SORT)) {
                 if (inputArray.length != 2) {
                     System.out.println("Wrong number of arguments. The SORT command follows the form: sort [stat]");
                     continue;
                 }
-                Enums.CATEGORY stat = parseCategory(input);
+                Enums.CATEGORY stat = parseCategory(inputArray);
                 if (stat == null)  {
                     System.out.println("An invalid stat was passed in. Only hp, attack, defense, spattack, " +
                             "spdefense, speed are accepted.");
@@ -810,6 +773,7 @@ public class Pokemon_DB {
             }
             else if (command.equals(Enums.COMMAND.COMPARE)) {
                 if (inputArray.length < 2) {
+                    // @TODO add logic to fail on "compare all all" since that works
                     System.out.println("Wrong number of arguments. The COMPARE command follows the " +
                             "form: compare [pokemon1] [pokemon2] where either pokemon1 or pokemon2 can be 'all' but not both");
                     continue;
@@ -881,7 +845,7 @@ public class Pokemon_DB {
                     System.out.println("Wrong number of arguments. The MAX command follows the form: max [stat]");
                     continue;
                 }
-                Enums.CATEGORY stat = parseCategory(input);
+                Enums.CATEGORY stat = parseCategory(inputArray);
                 if (stat == null) {
                     System.out.println("An invalid stat was passed in. Only hp, attack, defense, spattack, " +
                             "spdefense, speed are accepted.");
@@ -894,7 +858,7 @@ public class Pokemon_DB {
                     System.out.println("Wrong number of arguments. The MIN command follows the form: min [stat]");
                     continue;
                 }
-                Enums.CATEGORY stat = parseCategory(input);
+                Enums.CATEGORY stat = parseCategory(inputArray);
                 if (stat == null) {
                     System.out.println("An invalid stat was passed in. Only hp, attack, defense, spattack, " +
                             "spdefense, speed are accepted.");
@@ -924,7 +888,7 @@ public class Pokemon_DB {
                 }
                 // This can be anything other than name ex. get item lum berry
                 else {
-                    Enums.CATEGORY category = parseCategory(input);
+                    Enums.CATEGORY category = parseCategory(inputArray);
                     if (category == null) {
                         System.out.println("Invalid category. Acceptable categories are: item, id, move, hp, attack," +
                                 " defense, spattack, spdefense, speed.");
