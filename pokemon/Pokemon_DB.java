@@ -1,6 +1,7 @@
 package pokemon;
 
 import pokemon.commands.GetCommand;
+import pokemon.commands.InsertCommand;
 
 import java.sql.*;
 import java.text.DecimalFormat;
@@ -20,33 +21,6 @@ public class Pokemon_DB {
 
     // Contains the name of the main database table we are working with
     public static String currTable = "pokemon";
-
-    public void insert(String name, String item, int hp, int attack, int defense,
-                       int spattack, int spdefense, int speed, String move1, String move2,
-                       String move3, String move4) {
-        String sql = "INSERT INTO pokemon(name, item, hp, attack, defense, spattack, spdefense, speed, move1, move2, move3, move4) " +
-                "VALUES(?,?,?,?,?,?,?,?,?,?,?,?)";
-
-        try (Connection conn = databaseUtils.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, name);
-            pstmt.setString(2, item);
-            pstmt.setInt(3, hp);
-            pstmt.setInt(4, attack);
-            pstmt.setInt(5, defense);
-            pstmt.setInt(6, spattack);
-            pstmt.setInt(7, spdefense);
-            pstmt.setInt(8, speed);
-            pstmt.setString(9, move1);
-            pstmt.setString(10, move2);
-            pstmt.setString(11, move3);
-            pstmt.setString(12, move4);
-            pstmt.executeUpdate();
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
-    }
-
     public void update(int id, String colName, String newVal, String tableName, boolean isStat) {
         String sql = "UPDATE " + tableName + " SET " + colName + " = ? where id = ?" ;
         try (Connection conn = databaseUtils.connect();
@@ -617,42 +591,8 @@ public class Pokemon_DB {
                 }
             }
         }
-
         // compare suicune all (compare all suicune entries with averages of all in db)
         return 0;
-    }
-
-    public static void insertToTable(Pokemon_DB db, String pokemon_name) {
-        Scanner scan = new Scanner(System.in);
-        System.out.print("Item: ");
-        String item = scan.nextLine();
-        try {
-            System.out.print("HP: ");
-            int hp = Integer.parseInt(scan.nextLine());
-            System.out.print("Attack: ");
-            int attack = Integer.parseInt(scan.nextLine());
-            System.out.print("Defense: ");
-            int defense = Integer.parseInt(scan.nextLine());
-            System.out.print("Special Attack: ");
-            int spAttack = Integer.parseInt(scan.nextLine());
-            System.out.print("Special Defense: ");
-            int spDefense = Integer.parseInt(scan.nextLine());
-            System.out.print("Speed: ");
-            int speed = Integer.parseInt(scan.nextLine());
-            System.out.print("Move 1: ");
-            String move1 = scan.nextLine();
-            System.out.print("Move 2: ");
-            String move2 = scan.nextLine();
-            System.out.print("Move 3: ");
-            String move3 = scan.nextLine();
-            System.out.print("Move 4: ");
-            String move4 = scan.nextLine();
-            db.insert(pokemon_name, item, hp, attack, defense, spAttack, spDefense, speed, move1, move2, move3, move4);
-            System.out.println("SAVED");
-        } catch (java.lang.NumberFormatException ex) {
-            System.out.println("Inputs for stats must be integers");
-            System.out.println("Insert cancelled");
-        }
     }
 
     public boolean exists(String columnName, String value, String tableName) {
@@ -732,6 +672,7 @@ public class Pokemon_DB {
     public static void main(String[] args) {
         Pokemon_DB app = new Pokemon_DB();
         GetCommand selectCommand = new GetCommand();
+        InsertCommand insertCommand = new InsertCommand();
         app.databaseUtils.connect();
         Scanner scan = new Scanner(System.in);
         while (true) {
@@ -942,7 +883,7 @@ public class Pokemon_DB {
             else if (command.equals(Enums.COMMAND.INSERT)) {
                 if (inputArray.length == 3) {
                     if ((inputArray[1] + " " + inputArray[2]).equals("mr. mime")) {
-                        insertToTable(app, "Mr. Mime"); } else {
+                        insertCommand.insertToTable("Mr. Mime"); } else {
                         System.out.println("Wrong number of arguments. The INSERT command follows the form: insert [pokemon]");
                         continue;
                     }
@@ -952,7 +893,7 @@ public class Pokemon_DB {
                     continue;
                 }
                 String pokemonName = inputArray[1].substring(0, 1).toUpperCase() + inputArray[1].substring(1);
-                insertToTable(app, pokemonName);
+                insertCommand.insertToTable(pokemonName);
             }
             else if (command.equals(Enums.COMMAND.DELETE)) {
                 // valid arguments check
