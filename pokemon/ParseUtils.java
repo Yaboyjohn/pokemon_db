@@ -4,7 +4,6 @@ package pokemon;
  * Class that holds all the functions that parse the text passed into text prompts
  */
 public class ParseUtils {
-    /** returns the first word in the input */
     /**
      *
      * @param inputArray eg. ["get", "item", "king's", "rock"]
