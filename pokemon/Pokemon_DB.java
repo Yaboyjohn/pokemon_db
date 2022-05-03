@@ -668,16 +668,6 @@ public class Pokemon_DB {
             System.out.println(e.getMessage());
         }
         return count != 0;
-
-    }
-
-    /** returns a String[] where the first elem is the stat and the second is the value of the stat **/
-    public static String[] parseStat(String input) {
-        String[] res = new String[2];
-        String[] inputArray = input.split(" ");
-        res[0] = inputArray[2];
-        res[1] = inputArray[3];
-        return res;
     }
 
     public void backFillHashMap(String tableName) {
@@ -921,8 +911,10 @@ public class Pokemon_DB {
                     // ex. get hp > 300, get hp = 300, get hp >= 300
                     else if (category.equals(Enums.CATEGORY.HP) || category.equals(Enums.CATEGORY.ATTACK)|| category.equals(Enums.CATEGORY.DEFENSE) ||
                             category.equals(Enums.CATEGORY.SPATTACK) || category.equals(Enums.CATEGORY.SPDEFENSE) || category.equals(Enums.CATEGORY.SPEED)) {
+                        // inputArray = ["hp", ">", "300"]
                         String stat = inputArray[1];
-                        String operator = parseStat(input)[0];
+                        String operator = inputArray[2];
+                        String statValue = inputArray[3];
                         // @TODO: fix get hp <=181
                         /*
                         Exception in thread "main" java.lang.ArrayIndexOutOfBoundsException: 3
@@ -933,7 +925,7 @@ public class Pokemon_DB {
                             System.out.println("Invalid operator. Operators can only be <,>,>=,<= or =");
                             continue;
                         }
-                        int num = Integer.parseInt(parseStat(input)[1]);
+                        int num = Integer.parseInt(statValue);
                         // @TODO add validity check on operator. Currently "get attack * 100" and "get attack & 100" both work. Restrict operator to <,>,=
                         int count = selectCommand.selectStat(stat, operator, num, currTable);
                         if (count == 0) {
