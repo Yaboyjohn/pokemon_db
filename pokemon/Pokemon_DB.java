@@ -922,7 +922,17 @@ public class Pokemon_DB {
                     else if (category.equals(Enums.CATEGORY.HP) || category.equals(Enums.CATEGORY.ATTACK)|| category.equals(Enums.CATEGORY.DEFENSE) ||
                             category.equals(Enums.CATEGORY.SPATTACK) || category.equals(Enums.CATEGORY.SPDEFENSE) || category.equals(Enums.CATEGORY.SPEED)) {
                         String stat = inputArray[1];
-                        String operator = parseStat(input)[0];g
+                        String operator = parseStat(input)[0];
+                        // @TODO: fix get hp <=181
+                        /*
+                        Exception in thread "main" java.lang.ArrayIndexOutOfBoundsException: 3
+                        at pokemon.Pokemon_DB.parseStat(Pokemon_DB.java:679)
+                        at pokemon.Pokemon_DB.main(Pokemon_DB.java:925)
+                        */
+                        if (!operator.equals(">") && !operator.equals("<") && !operator.equals("=") && !operator.equals(">=") && !operator.equals("<=")) {
+                            System.out.println("Invalid operator. Operators can only be <,>,>=,<= or =");
+                            continue;
+                        }
                         int num = Integer.parseInt(parseStat(input)[1]);
                         // @TODO add validity check on operator. Currently "get attack * 100" and "get attack & 100" both work. Restrict operator to <,>,=
                         int count = selectCommand.selectStat(stat, operator, num, currTable);
