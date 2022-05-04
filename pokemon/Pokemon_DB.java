@@ -2,6 +2,7 @@ package pokemon;
 
 import pokemon.commands.GetCommand;
 import pokemon.commands.InsertCommand;
+import pokemon.commands.UpdateCommand;
 
 import java.sql.*;
 import java.text.DecimalFormat;
@@ -21,26 +22,6 @@ public class Pokemon_DB {
 
     // Contains the name of the main database table we are working with
     public static String currTable = "pokemon";
-    public void update(int id, String colName, String newVal, String tableName, boolean isStat) {
-        String sql = "UPDATE " + tableName + " SET " + colName + " = ? where id = ?" ;
-        try (Connection conn = databaseUtils.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-            // set the corresponding param
-            if (isStat) {
-                pstmt.setInt(1, Integer.parseInt(newVal));
-                pstmt.setInt(2, id);
-            } else {
-                pstmt.setString(1, newVal);
-                pstmt.setInt(2, id);
-            }
-            // update
-            pstmt.executeUpdate();
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
-    }
-
     public void delete(int id, String tableName) {
         String sql = "DELETE FROM " + tableName + " WHERE id = ?";
 
@@ -673,6 +654,7 @@ public class Pokemon_DB {
         Pokemon_DB app = new Pokemon_DB();
         GetCommand selectCommand = new GetCommand();
         InsertCommand insertCommand = new InsertCommand();
+        UpdateCommand updateCommand = new UpdateCommand();
         app.databaseUtils.connect();
         Scanner scan = new Scanner(System.in);
         while (true) {
@@ -962,9 +944,9 @@ public class Pokemon_DB {
                                     String val = scan.nextLine();
                                     if (category.equals("item") || category.equals("name") || category.equals("move1") ||
                                             category.equals("move2") || category.equals("move3") || category.equals("move4")) {
-                                        app.update(ID, category, val, currTable, false);
+                                        updateCommand.update(ID, category, val, currTable, false);
                                     } else {
-                                        app.update(ID, category, val, currTable, true);
+                                        updateCommand.update(ID, category, val, currTable, true);
                                     }
                                 }
                                 System.out.println("UPDATED");
@@ -1008,9 +990,9 @@ public class Pokemon_DB {
                                             String val = scan.nextLine();
                                             if (category.equals("item") || category.equals("name") || category.equals("move1") ||
                                                     category.equals("move2") || category.equals("move3") || category.equals("move4")) {
-                                                app.update(ID, category, val, currTable, false);
+                                                updateCommand.update(ID, category, val, currTable, false);
                                             } else {
-                                                app.update(ID, category, val, currTable, true);
+                                                updateCommand.update(ID, category, val, currTable, true);
                                             }
                                         }
                                         System.out.println("UPDATED");
